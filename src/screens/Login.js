@@ -22,8 +22,11 @@ export default function Login({ navigation }) {
             <Text style={styles.inputText}>Mot de passe</Text>
           </View>
 
-          <TouchableOpacity style={styles.primaryButton}>
-            <Text style={styles.primaryButtonText}>Se connecter</Text>
+          <TouchableOpacity
+            style={styles.button}
+            onPress={() => navigation.navigate('Dashboard')}
+          >
+            <Text style={styles.buttonText}>Se connecter</Text>
           </TouchableOpacity>
 
           <TouchableOpacity onPress={() => navigation.navigate("ForgotPassword")}>
@@ -33,7 +36,7 @@ export default function Login({ navigation }) {
           <View style={styles.row}>
             <Text style={styles.text}>Pas de compte ? </Text>
             <TouchableOpacity onPress={() => navigation.navigate("Signup")}>
-              <Text style={styles.link}>S’inscrire</Text>
+              <Text style={styles.link}>S'inscrire</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -50,8 +53,8 @@ const styles = StyleSheet.create({
   card: {
     flex: 7,
     backgroundColor: "#FFF",
-    borderTopLeftRadius: 40,
-    borderTopRightRadius: 40,
+    borderTopLeftRadius: 50,
+    borderTopRightRadius: 50,
     paddingTop: 42,
     paddingHorizontal: 28,
     paddingBottom: 16,
@@ -72,14 +75,18 @@ const styles = StyleSheet.create({
   },
   inputText: { color: "#FFF" },
 
-  primaryButton: {
+  // ✅ BOUTON SE CONNECTER PLUS PETIT
+  button: {
     marginTop: 6,
     backgroundColor: "#0F2B5B",
     paddingVertical: 12,
-    paddingHorizontal: 28,
+    paddingHorizontal: 40,
     borderRadius: 24,
   },
-  primaryButtonText: { color: "#FFF", fontWeight: "600" },
+  buttonText: { 
+    color: "#FFF", 
+    fontWeight: "600" 
+  },
 
   link: { color: "#081D4F", textAlign: "center", marginTop: 8, fontWeight: "700" },
   row: { flexDirection: "row", justifyContent: "center", marginTop: 6 },

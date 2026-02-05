@@ -74,8 +74,8 @@ const styles = StyleSheet.create({
   card: {
     flex: 7,
     backgroundColor: "#FFF",
-    borderTopLeftRadius: 40,
-    borderTopRightRadius: 40,
+    borderTopLeftRadius: 50,
+    borderTopRightRadius: 50,
     paddingTop: 26,
     paddingHorizontal: 28,
     paddingBottom: 16,
