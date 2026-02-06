@@ -1,10 +1,37 @@
+
+
 import React from "react";
-import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
+import {
+  View,
+  Text,
+  StyleSheet,
+  TouchableOpacity,
+  ImageBackground,
+} from "react-native";
+import { LinearGradient } from "expo-linear-gradient";
 
 export default function Login({ navigation }) {
+  const handleLogin = () => {
+    // TODO BACKEND: appeler l'API de connexion ici
+    navigation.navigate("Dashboard");
+  };
+
   return (
     <View style={styles.container}>
-      <View style={styles.topBg} />
+      <View style={styles.topBg}>
+        <ImageBackground
+          source={require("../../assets/img1.jpeg")}
+          style={styles.bgImage}
+        >
+          <LinearGradient
+            colors={["#D9A600", "#D9A600", "#D9D9D9"]}
+            locations={[0, 0.55, 1]}
+            start={{ x: 0.5, y: 0 }}
+            end={{ x: 0.5, y: 1 }}
+            style={styles.gradient}
+          />
+        </ImageBackground>
+      </View>
 
       <View style={styles.card}>
         <TouchableOpacity onPress={() => navigation.goBack()}>
@@ -22,7 +49,7 @@ export default function Login({ navigation }) {
             <Text style={styles.inputText}>Mot de passe</Text>
           </View>
 
-          <TouchableOpacity style={styles.primaryButton}>
+          <TouchableOpacity style={styles.primaryButton} onPress={handleLogin}>
             <Text style={styles.primaryButtonText}>Se connecter</Text>
           </TouchableOpacity>
 
@@ -43,9 +70,11 @@ export default function Login({ navigation }) {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#0F2B5B" },
+  container: { flex: 1, backgroundColor: "#FEBD00" },
 
-  topBg: { flex: 3, backgroundColor: "#0F2B5B" },
+  topBg: { flex: 4 },
+  bgImage: { flex: 1 },
+  gradient: { ...StyleSheet.absoluteFillObject, opacity: 0.75 },
 
   card: {
     flex: 7,
@@ -58,30 +87,38 @@ const styles = StyleSheet.create({
     marginTop: -55,
   },
 
-  back: { color: "#0F2B5B", marginBottom: 12 },
-  title: { fontSize: 24, fontWeight: "700", textAlign: "center", marginBottom: 11, marginTop: 30 },
+  back: { color: "black", marginBottom: 12 },
+  title: {
+    fontSize: 24,
+    fontWeight: "700",
+    textAlign: "center",
+    marginBottom: 11,
+    marginTop: 30,
+    color: "black",
+  },
 
-  formBlock: { alignItems: "center", marginTop: 46, gap: 6 },
+  formBlock: { alignItems: "center", marginTop: 46, gap: 18 },
 
   inputFake: {
     width: "100%",
-    backgroundColor: "#0F2B5B",
+    backgroundColor: "#D9D9D9",
     borderRadius: 24,
-    paddingVertical: 12,
+    paddingVertical: 19,
     paddingHorizontal: 18,
   },
   inputText: { color: "#FFF" },
 
   primaryButton: {
     marginTop: 6,
-    backgroundColor: "#0F2B5B",
+    backgroundColor: "#FEBD00",
     paddingVertical: 12,
     paddingHorizontal: 28,
     borderRadius: 24,
   },
   primaryButtonText: { color: "#FFF", fontWeight: "600" },
 
-  link: { color: "#081D4F", textAlign: "center", marginTop: 8, fontWeight: "700" },
-  row: { flexDirection: "row", justifyContent: "center", marginTop: 6 },
-  text: { color: "#0F2B5B" },
+  link: { color: "#F4B000", textAlign: "center", marginTop: 17, fontWeight: "700" },
+  row: { flexDirection: "row", justifyContent: "center", marginTop: 20 },
+  text: { color: "#111010ff", fontSize: 12, marginTop: 20 },
 });
+

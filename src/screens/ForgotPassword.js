@@ -31,9 +31,9 @@ export default function ForgotPassword({ navigation }) {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#0F2B5B" },
+  container: { flex: 1, backgroundColor: "#F4B000" },
 
-  topBg: { flex: 3, backgroundColor: "#0F2B5B" },
+  topBg: { flex: 3, backgroundColor: "#F4B000" },
 
   card: {
     flex: 7,
@@ -46,24 +46,34 @@ const styles = StyleSheet.create({
     marginTop: -55,
   },
 
-  back: { color: "#0F2B5B", marginBottom: 12 },
-  title: { fontSize: 20, fontWeight: "700", textAlign: "left" },
-  subtitle: { marginTop: 10, color: "#0F2B5B" },
+  back: { color: "black", marginBottom: 12 },
+  
+  // title: { fontSize: 20, fontWeight: "700", textAlign: "left" },
+   title: {
+    fontSize: 24,
+    fontWeight: "700",
+    textAlign: "center",
+    marginBottom: 11,
+    marginTop: 30,
+    color: "black",
+  },
+  subtitle: { marginTop: 10, color: "#0F2B5B", textAlign: "center", paddingHorizontal: 20 , fontSize: 17 , padding: 20 },
 
-  formBlock: { alignItems: "center", marginTop: 18 },
+  formBlock: { alignItems: "center", marginTop: 18 ,gap: 18},
   inputFake: {
     width: "100%",
-    backgroundColor: "#0F2B5B",
+    backgroundColor: "#D9D9D9",
     borderRadius: 24,
     paddingVertical: 12,
     paddingHorizontal: 18,
     marginBottom: 12,
+    marginTop: 20,
   },
   inputText: { color: "#FFF" },
 
   primaryButton: {
     marginTop: 4,
-    backgroundColor: "#0F2B5B",
+    backgroundColor: "#FEBD00",
     paddingVertical: 12,
     paddingHorizontal: 28,
     borderRadius: 24,

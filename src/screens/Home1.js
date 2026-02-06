@@ -35,7 +35,7 @@ export default function Home1({ navigation }) {
             <Text style={styles.primaryButtonText}>Commencer</Text>
           </TouchableOpacity>
 
-          <TouchableOpacity style={styles.googleButton}>
+          {/* <TouchableOpacity style={styles.googleButton}>
             <View style={styles.googleRow}>
               <View style={styles.googleIcon}>
                 <Text style={styles.googleIconText}>G</Text>
@@ -44,7 +44,7 @@ export default function Home1({ navigation }) {
                 Continuer avec google
               </Text>
             </View>
-          </TouchableOpacity>
+          </TouchableOpacity> */}
         </View>
 
         <Text style={styles.footer}>
@@ -56,9 +56,9 @@ export default function Home1({ navigation }) {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#0F2B5B" },
+  container: { flex: 1, backgroundColor: "#FEBD00" },
 
-  imageWrap: { flex: 3, zIndex: 1 },
+  imageWrap: { flex: 4, zIndex: 1 },
   imageClip: {
     flex: 1,
     borderBottomLeftRadius: 40,
@@ -67,9 +67,10 @@ const styles = StyleSheet.create({
   },
   imageBg: { flex: 1, width: "100%" },
   imageOverlay: {
-    ...StyleSheet.absoluteFillObject,
-    backgroundColor: "rgba(6, 35, 94, 0.86)",
-  },
+  ...StyleSheet.absoluteFillObject,
+  backgroundColor: "rgba(254, 189, 0, 0.75)",
+},
+
 
   card: {
     flex: 7,
@@ -85,37 +86,19 @@ const styles = StyleSheet.create({
     elevation: 2,
   },
 
-  topBlock: { alignItems: "center", marginTop: 24 },
-  logo: { fontSize: 28, fontWeight: "700", color: "#0F2B5B" },
-  subtitle: { marginTop: 10, color: "#0F2B5B", fontStyle: "italic" },
+  topBlock: { alignItems: "center", marginTop: 4 },
+  logo: { fontSize: 35, fontWeight: "700", color: "black" ,letterSpacing: 1, marginTop: 30, marginBottom: 11},
+  subtitle: { marginTop: 56, color: "black", fontSize: 17 ,justifyContent: "center", textAlign: "center" },
 
   middleBlock: { alignItems: "center" },
   primaryButton: {
-    backgroundColor: "#0F2B5B",
+    backgroundColor: "#FEBD00",
     paddingVertical: 12,
     paddingHorizontal: 32,
     borderRadius: 24,
   },
   primaryButtonText: { color: "#FFF", fontWeight: "600" },
 
-  googleButton: {
-    marginTop: 10,
-    backgroundColor: "#0F2B5B",
-    paddingVertical: 12,
-    paddingHorizontal: 18,
-    borderRadius: 24,
-  },
-  googleRow: { flexDirection: "row", alignItems: "center", gap: 8 },
-  googleIcon: {
-    width: 18,
-    height: 18,
-    borderRadius: 9,
-    backgroundColor: "#FFF",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  googleIconText: { fontSize: 12, fontWeight: "700", color: "#0F2B5B" },
-  googleButtonText: { color: "#FFF", fontSize: 12 },
 
-  footer: { fontSize: 12, color: "#0F2B5B", textAlign: "center" },
+  footer: { fontSize: 12, color: "#0F2B5B", textAlign: "center",  paddingBottom: 12 },
 });
