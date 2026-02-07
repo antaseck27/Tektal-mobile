@@ -17,7 +17,7 @@ export default function Dashboard() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#F4B000",
+    backgroundColor: "#f0e322ff",
     alignItems: "center",
     justifyContent: "center",
     paddingHorizontal: 24,

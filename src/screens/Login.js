@@ -117,7 +117,7 @@ const styles = StyleSheet.create({
   },
   primaryButtonText: { color: "#FFF", fontWeight: "600" },
 
-  link: { color: "#F4B000", textAlign: "center", marginTop: 17, fontWeight: "700" },
+  link: { color: "#f0e322ff", textAlign: "center", marginTop: 17, fontWeight: "700" },
   row: { flexDirection: "row", justifyContent: "center", marginTop: 20 },
   text: { color: "#111010ff", fontSize: 12, marginTop: 20 },
 });

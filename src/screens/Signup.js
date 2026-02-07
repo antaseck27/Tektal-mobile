@@ -40,9 +40,9 @@
 // }
 
 // const styles = StyleSheet.create({
-//   container: { flex: 1, backgroundColor: "#F4B000" },
+//   container: { flex: 1, backgroundColor: "#f0e322ff" },
 
-//   topBg: { flex: 3, backgroundColor: "#F4B000" },
+//   topBg: { flex: 3, backgroundColor: "#f0e322ff" },
 
 //   card: {
 //     flex: 7,
@@ -72,7 +72,7 @@
 
 //   primaryButton: {
 //     marginTop: 20,
-//     backgroundColor: "#F4B000",
+//     backgroundColor: "#f0e322ff",
 //     paddingVertical: 12,
 //     paddingHorizontal: 28,
 //     borderRadius: 24,
@@ -143,7 +143,7 @@ export default function Signup({ navigation }) {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#F4B000" },
+  container: { flex: 1, backgroundColor: "#f0e322ff" },
 
   topBg: { flex: 3 },
   bgImage: { flex: 1 },
@@ -181,7 +181,7 @@ const styles = StyleSheet.create({
 
   primaryButton: {
     marginTop: 20,
-    backgroundColor: "#F4B000",
+    backgroundColor: "#f0e322ff",
     paddingVertical: 12,
     paddingHorizontal: 28,
     borderRadius: 24,
