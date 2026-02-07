@@ -1,7 +1,11 @@
+
+
+
 // import React from "react";
 // import { NavigationContainer } from "@react-navigation/native";
 // import { createNativeStackNavigator } from "@react-navigation/native-stack";
 
+// import Welcome from "./src/screens/Welcome";
 // import Home1 from "./src/screens/Home1";
 // import Login from "./src/screens/Login";
 // import Signup from "./src/screens/Signup";
@@ -13,7 +17,12 @@
 // export default function App() {
 //   return (
 //     <NavigationContainer>
-//       <Stack.Navigator initialRouteName="Home1">
+//       <Stack.Navigator initialRouteName="Welcome">
+//         <Stack.Screen
+//           name="Welcome"
+//           component={Welcome}
+//           options={{ headerShown: false }}
+//         />
 //         <Stack.Screen
 //           name="Home1"
 //           component={Home1}
@@ -54,7 +63,7 @@ import Home1 from "./src/screens/Home1";
 import Login from "./src/screens/Login";
 import Signup from "./src/screens/Signup";
 import ForgotPassword from "./src/screens/ForgotPassword";
-import Dashboard from "./src/screens/Dashboard";
+import OngletsPrincipaux from "./src/navigation/OngletsPrincipaux";
 
 const Stack = createNativeStackNavigator();
 
@@ -89,7 +98,7 @@ export default function App() {
         />
         <Stack.Screen
           name="Dashboard"
-          component={Dashboard}
+          component={OngletsPrincipaux}
           options={{ headerShown: false }}
         />
       </Stack.Navigator>
