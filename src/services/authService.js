@@ -1,0 +1,87 @@
+import * as SecureStore from "expo-secure-store";
+import { API_URL } from "../config/api";
+
+async function saveTokens({ access, refresh }) {
+  if (access) await SecureStore.setItemAsync("access", access);
+  if (refresh) await SecureStore.setItemAsync("refresh", refresh);
+}
+
+async function getAccessToken() {
+  return SecureStore.getItemAsync("access");
+}
+
+async function clearTokens() {
+  await SecureStore.deleteItemAsync("access");
+  await SecureStore.deleteItemAsync("refresh");
+}
+
+export async function register({ email, password }) {
+  const res = await fetch(`${API_URL}/api/auth/users/`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ email, password }),
+  });
+  return res.json();
+}
+
+export async function login({ email, password }) {
+  const res = await fetch(`${API_URL}/api/auth/jwt/create/`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ email, password }),
+  });
+  const data = await res.json();
+  if (res.ok) await saveTokens(data);
+  return data;
+}
+
+export async function refreshToken() {
+  const refresh = await SecureStore.getItemAsync("refresh");
+  const res = await fetch(`${API_URL}/api/auth/jwt/refresh/`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ refresh }),
+  });
+  const data = await res.json();
+  if (res.ok) await saveTokens({ access: data.access });
+  return data;
+}
+
+export async function getProfile() {
+  const access = await getAccessToken();
+  const res = await fetch(`${API_URL}/api/auth/users/me/`, {
+    headers: { Authorization: `Bearer ${access}` },
+  });
+  return res.json();
+}
+
+export async function activateAccount({ uid, token }) {
+  const res = await fetch(`${API_URL}/api/auth/users/activation/`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ uid, token }),
+  });
+  return res.json();
+}
+
+export async function resetPassword(email) {
+  const res = await fetch(`${API_URL}/api/auth/users/reset_password/`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ email }),
+  });
+  return res.json();
+}
+
+export async function confirmReset({ uid, token, new_password, re_new_password }) {
+  const res = await fetch(`${API_URL}/api/auth/users/reset_password_confirm/`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ uid, token, new_password, re_new_password }),
+  });
+  return res.json();
+}
+
+export async function logout() {
+  await clearTokens();
+}
