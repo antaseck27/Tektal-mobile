@@ -1,17 +1,34 @@
 
 
 
-// import React from "react";
+// import React, { useState } from "react";
 // import {
 //   View,
 //   Text,
 //   StyleSheet,
 //   TouchableOpacity,
 //   ImageBackground,
+//   TextInput,
+//   Alert,
 // } from "react-native";
 // import { LinearGradient } from "expo-linear-gradient";
+// import { register } from "../services/authService";
 
 // export default function Signup({ navigation }) {
+//   const [nom, setNom] = useState("");
+//   const [email, setEmail] = useState("");
+//   const [password, setPassword] = useState("");
+
+//   const handleSignup = async () => {
+//     const res = await register({ email, password });
+//     if (res?.email) {
+//       Alert.alert("Succès", "Compte créé. Vérifie ton email.");
+//       navigation.navigate("Login");
+//     } else {
+//       Alert.alert("Erreur", JSON.stringify(res));
+//     }
+//   };
+
 //   return (
 //     <View style={styles.container}>
 //       <View style={styles.topBg}>
@@ -37,23 +54,34 @@
 //         <Text style={styles.title}>Inscription</Text>
 
 //         <View style={styles.formBlock}>
-//           <View style={styles.inputFake}>
-//             <Text style={styles.inputText}>Nom</Text>
-//           </View>
+//           <TextInput
+//             style={styles.inputFake}
+//             placeholder="Nom"
+//             placeholderTextColor="#FFF"
+//             value={nom}
+//             onChangeText={setNom}
+//           />
 
-//           <View style={styles.inputFake}>
-//             <Text style={styles.inputText}>Email</Text>
-//           </View>
+//           <TextInput
+//             style={styles.inputFake}
+//             placeholder="Email"
+//             placeholderTextColor="#FFF"
+//             value={email}
+//             onChangeText={setEmail}
+//             autoCapitalize="none"
+//             keyboardType="email-address"
+//           />
 
-//           <View style={styles.inputFake}>
-//             <Text style={styles.inputText}>Mot de passe</Text>
-//           </View>
+//           <TextInput
+//             style={styles.inputFake}
+//             placeholder="Mot de passe"
+//             placeholderTextColor="#FFF"
+//             value={password}
+//             onChangeText={setPassword}
+//             secureTextEntry
+//           />
 
-//           <View style={styles.inputFake}>
-//             <Text style={styles.inputText}>Confirmer mot de passe</Text>
-//           </View>
-
-//           <TouchableOpacity style={styles.primaryButton}>
+//           <TouchableOpacity style={styles.primaryButton} onPress={handleSignup}>
 //             <Text style={styles.primaryButtonText}>S’inscrire</Text>
 //           </TouchableOpacity>
 //         </View>
@@ -64,7 +92,6 @@
 
 // const styles = StyleSheet.create({
 //   container: { flex: 1, backgroundColor: "#F4B000" },
-
 //   topBg: { flex: 3 },
 //   bgImage: { flex: 1 },
 //   gradient: { ...StyleSheet.absoluteFillObject, opacity: 0.75 },
@@ -81,12 +108,7 @@
 //   },
 
 //   back: { color: "black", marginBottom: 12 },
-//   title: {
-//     fontSize: 24,
-//     fontWeight: "700",
-//     textAlign: "center",
-//     marginBottom: 16,
-//   },
+//   title: { fontSize: 24, fontWeight: "700", textAlign: "center", marginBottom: 16 },
 
 //   formBlock: { alignItems: "center", marginTop: 20, gap: 18 },
 
@@ -96,8 +118,8 @@
 //     borderRadius: 24,
 //     paddingVertical: 12,
 //     paddingHorizontal: 18,
+//     color: "#FFF",
 //   },
-//   inputText: { color: "#FFF" },
 
 //   primaryButton: {
 //     marginTop: 20,
@@ -118,7 +140,7 @@ import {
   TouchableOpacity,
   ImageBackground,
   TextInput,
-  Alert,
+  ActivityIndicator,
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { register } from "../services/authService";
@@ -127,14 +149,31 @@ export default function Signup({ navigation }) {
   const [nom, setNom] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [status, setStatus] = useState({ type: "", message: "" });
 
   const handleSignup = async () => {
-    const res = await register({ email, password });
-    if (res?.email) {
-      Alert.alert("Succès", "Compte créé. Vérifie ton email.");
-      navigation.navigate("Login");
-    } else {
-      Alert.alert("Erreur", JSON.stringify(res));
+    if (loading) return;
+    if (!email || !password) {
+      setStatus({ type: "error", message: "Email et mot de passe obligatoires." });
+      return;
+    }
+
+    setLoading(true);
+    setStatus({ type: "", message: "" });
+
+    try {
+      const res = await register({ email, password, full_name: nom });
+      if (res.ok) {
+        setStatus({ type: "success", message: "Compte créé. Vérifie ton email." });
+        setTimeout(() => navigation.navigate("Login"), 800);
+      } else {
+        setStatus({ type: "error", message: JSON.stringify(res.data) });
+      }
+    } catch (e) {
+      setStatus({ type: "error", message: "Erreur réseau. Réessayez." });
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -164,15 +203,15 @@ export default function Signup({ navigation }) {
 
         <View style={styles.formBlock}>
           <TextInput
-            style={styles.inputFake}
-            placeholder="Nom"
+            style={styles.input}
+            placeholder="Nom complet"
             placeholderTextColor="#FFF"
             value={nom}
             onChangeText={setNom}
           />
 
           <TextInput
-            style={styles.inputFake}
+            style={styles.input}
             placeholder="Email"
             placeholderTextColor="#FFF"
             value={email}
@@ -182,7 +221,7 @@ export default function Signup({ navigation }) {
           />
 
           <TextInput
-            style={styles.inputFake}
+            style={styles.input}
             placeholder="Mot de passe"
             placeholderTextColor="#FFF"
             value={password}
@@ -190,9 +229,28 @@ export default function Signup({ navigation }) {
             secureTextEntry
           />
 
-          <TouchableOpacity style={styles.primaryButton} onPress={handleSignup}>
-            <Text style={styles.primaryButtonText}>S’inscrire</Text>
+          <TouchableOpacity
+            style={[styles.primaryButton, loading && styles.primaryButtonDisabled]}
+            onPress={handleSignup}
+            disabled={loading}
+          >
+            {loading ? (
+              <ActivityIndicator color="#FFF" />
+            ) : (
+              <Text style={styles.primaryButtonText}>S’inscrire</Text>
+            )}
           </TouchableOpacity>
+
+          {status.message ? (
+            <Text
+              style={[
+                styles.statusText,
+                status.type === "success" ? styles.statusSuccess : styles.statusError,
+              ]}
+            >
+              {status.message}
+            </Text>
+          ) : null}
         </View>
       </View>
     </View>
@@ -221,7 +279,7 @@ const styles = StyleSheet.create({
 
   formBlock: { alignItems: "center", marginTop: 20, gap: 18 },
 
-  inputFake: {
+  input: {
     width: "100%",
     backgroundColor: "#D9D9D9",
     borderRadius: 24,
@@ -236,6 +294,13 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     paddingHorizontal: 28,
     borderRadius: 24,
+    minWidth: 160,
+    alignItems: "center",
   },
+  primaryButtonDisabled: { opacity: 0.7 },
   primaryButtonText: { color: "#FFF", fontWeight: "600" },
+
+  statusText: { marginTop: 12, textAlign: "center", fontWeight: "600" },
+  statusSuccess: { color: "#1f9d55" },
+  statusError: { color: "#c53030" },
 });
