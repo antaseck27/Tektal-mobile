@@ -1,6 +1,5 @@
 
 
-
 // import React from "react";
 // import { NavigationContainer } from "@react-navigation/native";
 // import { createNativeStackNavigator } from "@react-navigation/native-stack";
@@ -10,7 +9,7 @@
 // import Login from "./src/screens/Login";
 // import Signup from "./src/screens/Signup";
 // import ForgotPassword from "./src/screens/ForgotPassword";
-// import Dashboard from "./src/screens/Dashboard";
+// import OngletsPrincipaux from "./src/navigation/OngletsPrincipaux";
 
 // const Stack = createNativeStackNavigator();
 
@@ -45,7 +44,7 @@
 //         />
 //         <Stack.Screen
 //           name="Dashboard"
-//           component={Dashboard}
+//           component={OngletsPrincipaux}
 //           options={{ headerShown: false }}
 //         />
 //       </Stack.Navigator>
@@ -67,9 +66,24 @@ import OngletsPrincipaux from "./src/navigation/OngletsPrincipaux";
 
 const Stack = createNativeStackNavigator();
 
+// Deep link config: tektal://login, tektal://signup, tektal://dashboard, etc.
+const linking = {
+  prefixes: ["tektal://"],
+  config: {
+    screens: {
+      Welcome: "welcome",
+      Home1: "home1",
+      Login: "login",
+      Signup: "signup",
+      ForgotPassword: "forgot-password",
+      Dashboard: "dashboard",
+    },
+  },
+};
+
 export default function App() {
   return (
-    <NavigationContainer>
+    <NavigationContainer linking={linking}>
       <Stack.Navigator initialRouteName="Welcome">
         <Stack.Screen
           name="Welcome"
