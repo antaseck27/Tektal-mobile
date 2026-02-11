@@ -1,5 +1,6 @@
 
 
+// /Users/antayussuf/Desktop/volkeno/tektal-mobile/src/services/authService.js
 import * as SecureStore from "expo-secure-store";
 import { API_URL } from "../config/api";
 
@@ -98,5 +99,20 @@ export async function confirmReset({ uid, token, new_password, re_new_password }
 }
 
 export async function logout() {
-  await clearTokens();
+  try {
+    const refresh = await SecureStore.getItemAsync("refresh");
+
+    // Optionnel: invalider le refresh token côté backend
+    if (refresh) {
+      await fetch(`${API_URL}/api/auth/jwt/blacklist/`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ refresh }),
+      });
+    }
+  } catch (e) {
+    // ignore
+  } finally {
+    await clearTokens();
+  }
 }

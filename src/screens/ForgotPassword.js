@@ -130,7 +130,7 @@ const styles = StyleSheet.create({
     elevation: 2,
   },
 
-  back: { color: "black", marginBottom: 12 },
+  back: { color: "black", marginBottom: 29 },
   title: {
     fontSize: 22,
     fontWeight: "700",
@@ -153,8 +153,8 @@ const styles = StyleSheet.create({
     width: "100%",
     backgroundColor: "#D9D9D9",
     borderRadius: 24,
-    paddingVertical: 12,
-    paddingHorizontal: 18,
+    paddingVertical: 19,
+    paddingHorizontal: 28,
     color: "#FFF",
   },
 

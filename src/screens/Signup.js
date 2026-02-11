@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import {
   View,
@@ -104,7 +105,7 @@ export default function Signup({ navigation }) {
             {loading ? (
               <ActivityIndicator color="#FFF" />
             ) : (
-              <Text style={styles.primaryButtonText}>S'inscrire</Text>
+              <Text style={styles.primaryButtonText}>S’inscrire</Text>
             )}
           </TouchableOpacity>
 
@@ -147,14 +148,14 @@ const styles = StyleSheet.create({
   back: { color: "black", marginBottom: 12 },
   title: { fontSize: 24, fontWeight: "700", textAlign: "center", marginBottom: 16 },
 
-  formBlock: { alignItems: "center", marginTop: 20, gap: 18 },
+  formBlock: { alignItems: "center", marginTop: 20, gap: 28 },
 
   input: {
     width: "100%",
     backgroundColor: "#D9D9D9",
     borderRadius: 24,
-    paddingVertical: 12,
-    paddingHorizontal: 18,
+    paddingVertical: 19,
+    paddingHorizontal: 28,
     color: "#FFF",
   },
 
