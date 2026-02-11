@@ -1,5 +1,3 @@
-
-
 import React, { useState } from "react";
 import {
   View,
@@ -106,7 +104,7 @@ export default function Signup({ navigation }) {
             {loading ? (
               <ActivityIndicator color="#FFF" />
             ) : (
-              <Text style={styles.primaryButtonText}>S’inscrire</Text>
+              <Text style={styles.primaryButtonText}>S'inscrire</Text>
             )}
           </TouchableOpacity>
 
@@ -176,4 +174,3 @@ const styles = StyleSheet.create({
   statusSuccess: { color: "#1f9d55" },
   statusError: { color: "#c53030" },
 });
-

@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import {
   View,
@@ -110,7 +109,7 @@ export default function Login({ navigation }) {
           <View style={styles.row}>
             <Text style={styles.text}>Pas de compte ? </Text>
             <TouchableOpacity onPress={() => navigation.navigate("Signup")}>
-              <Text style={styles.link}>S’inscrire</Text>
+              <Text style={styles.link}>S'inscrire</Text>
             </TouchableOpacity>
           </View>
 

@@ -50,8 +50,9 @@
         "projectId": "1a1e235e-bb89-4a93-9704-37445ffb8a53"
       }
     },
+
     "plugins": [
-      "expo-secure-store"
+      "expo-video"
     ]
   }
 }
