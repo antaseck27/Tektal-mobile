@@ -1,4 +1,4 @@
-// screens/Ajouter.js
+// screens/TableauDeBord/Ajouter.js
 import React, { useState } from 'react';
 import {
   View,
@@ -24,21 +24,12 @@ export default function Ajouter({ navigation }) {
       return;
     }
 
-    // TODO: Navigation vers l'écran d'enregistrement vidéo
-    Alert.alert(
-      'Enregistrement',
-      `De: ${departure}\nVers: ${destination}\nType: ${pathType === 'official' ? 'Officiel' : 'Communautaire'}`,
-      [
-        {
-          text: 'Commencer',
-          onPress: () => {
-            console.log('Démarrer l\'enregistrement vidéo');
-            // navigation.navigate('VideoRecorder', { departure, destination, pathType });
-          },
-        },
-        { text: 'Annuler', style: 'cancel' },
-      ]
-    );
+    // ✅ Navigation directe vers VideoRecorder
+    navigation.navigate('VideoRecorder', { 
+      departure, 
+      destination, 
+      pathType 
+    });
   };
 
   return (
