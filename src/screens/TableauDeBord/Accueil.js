@@ -1,7 +1,7 @@
 
 
-// // screens/TableauDeBord/Accueil.js
-// import React from 'react';
+// // /Users/antayussuf/Desktop/volkeno/tektal-mobile/src/screens/TableauDeBord/Accueil.js
+// import React, { useEffect, useState } from "react";
 // import {
 //   View,
 //   Text,
@@ -14,17 +14,56 @@
 //   Dimensions,
 //   StatusBar,
 //   Alert,
-// } from 'react-native';
-// import { Ionicons } from '@expo/vector-icons';
-// import { LinearGradient } from 'expo-linear-gradient';
-// import { usePaths } from '../../context/PathContext';
+// } from "react-native";
+// import { useSelector } from "react-redux";
+// import { Ionicons } from "@expo/vector-icons";
+// import { LinearGradient } from "expo-linear-gradient";
+// import { usePaths } from "../../context/PathContext";
+// import { getProfile } from "../../services/authService";
 
-// const { width } = Dimensions.get('window');
+// const { width } = Dimensions.get("window");
 // const CARD_WIDTH = width * 0.65;
 
 // export default function Accueil({ navigation }) {
 //   const { paths, loading, toggleFavorite, refreshPaths, deletePath } = usePaths();
-//   const [refreshing, setRefreshing] = React.useState(false);
+//   const reduxUser = useSelector((state) => state.auth.user);
+
+//   const [refreshing, setRefreshing] = useState(false);
+//   const [userName, setUserName] = useState("Utilisateur");
+
+//   useEffect(() => {
+//     let mounted = true;
+
+//     const fromRedux =
+//       reduxUser?.full_name ||
+//       reduxUser?.name ||
+//       (reduxUser?.email ? reduxUser.email.split("@")[0] : "");
+
+//     if (fromRedux && mounted) {
+//       setUserName(fromRedux);
+//     }
+
+//     const loadUserFallback = async () => {
+//       try {
+//         const res = await getProfile();
+//         if (!mounted || !res?.ok) return;
+//         const user = res.data || {};
+//         setUserName(
+//           user.full_name ||
+//             user.name ||
+//             (user.email ? user.email.split("@")[0] : "Utilisateur")
+//         );
+//       } catch {
+//         // ignore
+//       }
+//     };
+
+//     if (!fromRedux) loadUserFallback();
+
+//     return () => {
+//       mounted = false;
+//     };
+//   }, [reduxUser]);
 
 //   const onRefresh = async () => {
 //     setRefreshing(true);
@@ -33,7 +72,7 @@
 //   };
 
 //   const handleOpenPath = (path) => {
-//     navigation.navigate('VideoPlayer', { path });
+//     navigation.navigate("VideoPlayer", { path });
 //   };
 
 //   const handleToggleFavorite = async (id) => {
@@ -42,21 +81,18 @@
 
 //   const handleDeletePath = (path) => {
 //     Alert.alert(
-//       'Supprimer le chemin',
+//       "Supprimer le chemin",
 //       `Êtes-vous sûr de vouloir supprimer "${path.title}" ?`,
 //       [
+//         { text: "Annuler", style: "cancel" },
 //         {
-//           text: 'Annuler',
-//           style: 'cancel'
-//         },
-//         {
-//           text: 'Supprimer',
-//           style: 'destructive',
+//           text: "Supprimer",
+//           style: "destructive",
 //           onPress: async () => {
 //             await deletePath(path.id);
 //             await refreshPaths();
-//           }
-//         }
+//           },
+//         },
 //       ]
 //     );
 //   };
@@ -74,10 +110,8 @@
 //     return (
 //       <View style={styles.container}>
 //         <StatusBar barStyle="light-content" />
-        
-//         {/* Header sans bords arrondis */}
-//         <LinearGradient 
-//           colors={['#FFC837', '#FEBD00']} 
+//         <LinearGradient
+//           colors={["#FFC837", "#FEBD00"]}
 //           style={styles.header}
 //           start={{ x: 0, y: 0 }}
 //           end={{ x: 1, y: 1 }}
@@ -86,7 +120,6 @@
 //             <View>
 //               <Text style={styles.headerGreeting}>Bonjour 👋</Text>
 //               <Text style={styles.headerTitle}>{userName}</Text>
-//               {/* <Text style={styles.headerTitle}>Mamadou</Text> */}
 //             </View>
 //             <TouchableOpacity style={styles.notificationButton}>
 //               <View style={styles.notificationIconContainer}>
@@ -99,7 +132,6 @@
 //           </View>
 //         </LinearGradient>
 
-//         {/* État vide */}
 //         <View style={styles.emptyContainer}>
 //           <View style={styles.emptyIconContainer}>
 //             <Ionicons name="map-outline" size={80} color="#FEBD00" />
@@ -110,11 +142,11 @@
 //           </Text>
 //           <TouchableOpacity
 //             style={styles.createButton}
-//             onPress={() => navigation.navigate('Ajouter')}
+//             onPress={() => navigation.navigate("Ajouter")}
 //             activeOpacity={0.8}
 //           >
 //             <LinearGradient
-//               colors={['#FFC837', '#FEBD00']}
+//               colors={["#FFC837", "#FEBD00"]}
 //               style={styles.createButtonGradient}
 //               start={{ x: 0, y: 0 }}
 //               end={{ x: 1, y: 0 }}
@@ -133,19 +165,18 @@
 //       style={styles.container}
 //       showsVerticalScrollIndicator={false}
 //       refreshControl={
-//         <RefreshControl 
-//           refreshing={refreshing} 
+//         <RefreshControl
+//           refreshing={refreshing}
 //           onRefresh={onRefresh}
 //           tintColor="#FEBD00"
-//           colors={['#FEBD00']}
+//           colors={["#FEBD00"]}
 //         />
 //       }
 //     >
 //       <StatusBar barStyle="light-content" />
-      
-//       {/* Header sans bords arrondis */}
-//       <LinearGradient 
-//         colors={['#FFC837', '#FEBD00']} 
+
+//       <LinearGradient
+//         colors={["#FFC837", "#FEBD00"]}
 //         style={styles.header}
 //         start={{ x: 0, y: 0 }}
 //         end={{ x: 1, y: 1 }}
@@ -153,7 +184,7 @@
 //         <View style={styles.headerContent}>
 //           <View>
 //             <Text style={styles.headerGreeting}>Bonjour 👋</Text>
-//             <Text style={styles.headerTitle}>Mamadou</Text>
+//             <Text style={styles.headerTitle}>{userName}</Text>
 //           </View>
 //           <TouchableOpacity style={styles.notificationButton}>
 //             <View style={styles.notificationIconContainer}>
@@ -168,12 +199,11 @@
 //         </View>
 //       </LinearGradient>
 
-//       {/* Featured Section - Sans "Tout voir" */}
 //       <View style={styles.featuredSection}>
 //         <View style={styles.sectionHeader}>
 //           <Text style={styles.sectionTitle}>Derniers chemins</Text>
 //         </View>
-        
+
 //         <ScrollView
 //           horizontal
 //           showsHorizontalScrollIndicator={false}
@@ -188,15 +218,8 @@
 //               onPress={() => handleOpenPath(path)}
 //               activeOpacity={0.9}
 //             >
-//               <Image
-//                 source={{ uri: path.thumbnail }}
-//                 style={styles.featuredImage}
-//                 resizeMode="cover"
-//               />
-//               <LinearGradient
-//                 colors={['transparent', 'rgba(0,0,0,0.85)']}
-//                 style={styles.featuredGradient}
-//               >
+//               <Image source={{ uri: path.thumbnail }} style={styles.featuredImage} resizeMode="cover" />
+//               <LinearGradient colors={["transparent", "rgba(0,0,0,0.85)"]} style={styles.featuredGradient}>
 //                 <View style={styles.featuredTopBadges}>
 //                   {path.isOfficial && (
 //                     <View style={styles.officialBadgeFeatured}>
@@ -226,7 +249,6 @@
 //                 </View>
 //               </LinearGradient>
 
-//               {/* Play button en bas à droite - jaune */}
 //               <View style={styles.playButtonOverlay}>
 //                 <View style={styles.playButton}>
 //                   <Ionicons name="play" size={18} color="#fff" />
@@ -237,7 +259,6 @@
 //         </ScrollView>
 //       </View>
 
-//       {/* All Paths Section */}
 //       <View style={styles.recentSection}>
 //         <View style={styles.sectionHeader}>
 //           <Text style={styles.sectionTitle}>Tous les chemins</Text>
@@ -255,11 +276,7 @@
 //               activeOpacity={0.7}
 //             >
 //               <View style={styles.pathThumbnailContainer}>
-//                 <Image
-//                   source={{ uri: path.thumbnail }}
-//                   style={styles.pathThumbnail}
-//                   resizeMode="cover"
-//                 />
+//                 <Image source={{ uri: path.thumbnail }} style={styles.pathThumbnail} resizeMode="cover" />
 //                 {path.isOfficial && (
 //                   <View style={styles.officialBadgeSmall}>
 //                     <Ionicons name="shield-checkmark" size={10} color="#fff" />
@@ -296,9 +313,9 @@
 //                   activeOpacity={0.6}
 //                 >
 //                   <Ionicons
-//                     name={path.isFavorite ? 'heart' : 'heart-outline'}
+//                     name={path.isFavorite ? "heart" : "heart-outline"}
 //                     size={24}
-//                     color={path.isFavorite ? '#FF3B30' : '#ccc'}
+//                     color={path.isFavorite ? "#FF3B30" : "#ccc"}
 //                   />
 //                 </TouchableOpacity>
 
@@ -307,11 +324,7 @@
 //                   onPress={() => handleDeletePath(path)}
 //                   activeOpacity={0.6}
 //                 >
-//                   <Ionicons
-//                     name="trash-outline"
-//                     size={22}
-//                     color="#FF3B30"
-//                   />
+//                   <Ionicons name="trash-outline" size={22} color="#FF3B30" />
 //                 </TouchableOpacity>
 //               </View>
 //             </TouchableOpacity>
@@ -325,359 +338,169 @@
 // }
 
 // const styles = StyleSheet.create({
-//   container: { 
-//     flex: 1, 
-//     backgroundColor: '#F8F9FA' 
-//   },
-  
-//   loadingContainer: { 
-//     flex: 1, 
-//     justifyContent: 'center', 
-//     alignItems: 'center',
-//     backgroundColor: '#F8F9FA'
-//   },
-//   loadingText: { 
-//     marginTop: 16, 
-//     fontSize: 16, 
-//     color: '#666',
-//     fontWeight: '500'
-//   },
+//   container: { flex: 1, backgroundColor: "#F8F9FA" },
+//   loadingContainer: { flex: 1, justifyContent: "center", alignItems: "center", backgroundColor: "#F8F9FA" },
+//   loadingText: { marginTop: 16, fontSize: 16, color: "#666", fontWeight: "500" },
 
-//   // Header SANS bords arrondis
-//   header: { 
-//     paddingTop: 60,
-//     paddingBottom: 20,
-//     paddingHorizontal: 20,
-//   },
-//   headerContent: { 
-//     flexDirection: 'row', 
-//     justifyContent: 'space-between', 
-//     alignItems: 'center'
-//   },
-//   headerGreeting: { 
-//     fontSize: 16, 
-//     fontWeight: '500', 
-//     color: 'rgba(255,255,255,0.9)',
-//     marginBottom: 4
-//   },
-//   headerTitle: { 
-//     fontSize: 28, 
-//     fontWeight: 'bold', 
-//     color: '#fff',
-//     letterSpacing: 0.5
-//   },
-//   notificationButton: { 
-//     padding: 8 
-//   },
+//   header: { paddingTop: 60, paddingBottom: 20, paddingHorizontal: 20 },
+//   headerContent: { flexDirection: "row", justifyContent: "space-between", alignItems: "center" },
+//   headerGreeting: { fontSize: 16, fontWeight: "500", color: "rgba(255,255,255,0.9)", marginBottom: 4 },
+//   headerTitle: { fontSize: 28, fontWeight: "bold", color: "#fff", letterSpacing: 0.5 },
+//   notificationButton: { padding: 8 },
 //   notificationIconContainer: {
-//     position: 'relative',
+//     position: "relative",
 //     width: 40,
 //     height: 40,
 //     borderRadius: 20,
-//     backgroundColor: 'rgba(255,255,255,0.2)',
-//     justifyContent: 'center',
-//     alignItems: 'center'
+//     backgroundColor: "rgba(255,255,255,0.2)",
+//     justifyContent: "center",
+//     alignItems: "center",
 //   },
 //   notificationBadge: {
-//     position: 'absolute',
+//     position: "absolute",
 //     top: -2,
 //     right: -2,
-//     backgroundColor: '#FF3B30',
+//     backgroundColor: "#FF3B30",
 //     minWidth: 18,
 //     height: 18,
 //     borderRadius: 9,
-//     justifyContent: 'center',
-//     alignItems: 'center',
+//     justifyContent: "center",
+//     alignItems: "center",
 //     paddingHorizontal: 4,
 //     borderWidth: 2,
-//     borderColor: '#FFC837'
+//     borderColor: "#FFC837",
 //   },
-//   notificationBadgeText: { 
-//     color: '#fff', 
-//     fontSize: 10, 
-//     fontWeight: 'bold' 
-//   },
+//   notificationBadgeText: { color: "#fff", fontSize: 10, fontWeight: "bold" },
 
-//   // Empty state
-//   emptyContainer: { 
-//     flex: 1, 
-//     justifyContent: 'center', 
-//     alignItems: 'center', 
-//     padding: 32,
-//     marginTop: 40
-//   },
+//   emptyContainer: { flex: 1, justifyContent: "center", alignItems: "center", padding: 32, marginTop: 40 },
 //   emptyIconContainer: {
 //     width: 140,
 //     height: 140,
 //     borderRadius: 70,
-//     backgroundColor: '#FFF8E1',
-//     justifyContent: 'center',
-//     alignItems: 'center',
-//     marginBottom: 24
+//     backgroundColor: "#FFF8E1",
+//     justifyContent: "center",
+//     alignItems: "center",
+//     marginBottom: 24,
 //   },
-//   emptyTitle: { 
-//     fontSize: 22, 
-//     fontWeight: 'bold', 
-//     color: '#1a1a1a',
-//     marginBottom: 12,
-//     textAlign: 'center'
-//   },
-//   emptyText: { 
-//     fontSize: 15, 
-//     color: '#666', 
-//     textAlign: 'center',
+//   emptyTitle: { fontSize: 22, fontWeight: "bold", color: "#1a1a1a", marginBottom: 12, textAlign: "center" },
+//   emptyText: {
+//     fontSize: 15,
+//     color: "#666",
+//     textAlign: "center",
 //     lineHeight: 22,
 //     marginBottom: 32,
-//     paddingHorizontal: 20
+//     paddingHorizontal: 20,
 //   },
 //   createButton: {
 //     borderRadius: 28,
-//     overflow: 'hidden',
+//     overflow: "hidden",
 //     elevation: 4,
-//     shadowColor: '#FEBD00',
+//     shadowColor: "#FEBD00",
 //     shadowOffset: { width: 0, height: 4 },
 //     shadowOpacity: 0.3,
-//     shadowRadius: 8
+//     shadowRadius: 8,
 //   },
-//   createButtonGradient: {
-//     flexDirection: 'row',
-//     alignItems: 'center',
-//     paddingHorizontal: 28,
-//     paddingVertical: 14
-//   },
-//   createButtonText: { 
-//     color: '#fff', 
-//     fontWeight: 'bold', 
-//     marginLeft: 8,
-//     fontSize: 16
-//   },
+//   createButtonGradient: { flexDirection: "row", alignItems: "center", paddingHorizontal: 28, paddingVertical: 14 },
+//   createButtonText: { color: "#fff", fontWeight: "bold", marginLeft: 8, fontSize: 16 },
 
-//   // Featured section
-//   featuredSection: { 
-//     marginTop: 24,
-//     marginBottom: 8
-//   },
-//   sectionHeader: {
-//     flexDirection: 'row',
-//     justifyContent: 'space-between',
-//     alignItems: 'center',
-//     paddingHorizontal: 20,
-//     marginBottom: 16
-//   },
-//   sectionTitle: { 
-//     fontSize: 20, 
-//     fontWeight: 'bold',
-//     color: '#1a1a1a',
-//     letterSpacing: 0.3
-//   },
-//   featuredScroll: { 
-//     paddingRight: 20
-//   },
-//   featuredCard: { 
-//     width: CARD_WIDTH, 
-//     height: 200, 
+//   featuredSection: { marginTop: 24, marginBottom: 8 },
+//   sectionHeader: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", paddingHorizontal: 20, marginBottom: 16 },
+//   sectionTitle: { fontSize: 20, fontWeight: "bold", color: "#1a1a1a", letterSpacing: 0.3 },
+//   featuredScroll: { paddingRight: 20 },
+//   featuredCard: {
+//     width: CARD_WIDTH,
+//     height: 200,
 //     marginRight: 8,
-//     borderRadius: 20, 
-//     overflow: 'hidden',
+//     borderRadius: 20,
+//     overflow: "hidden",
 //     elevation: 6,
-//     shadowColor: '#000',
+//     shadowColor: "#000",
 //     shadowOffset: { width: 0, height: 4 },
 //     shadowOpacity: 0.15,
 //     shadowRadius: 12,
-//     backgroundColor: '#fff'
+//     backgroundColor: "#fff",
 //   },
-//   featuredImage: { 
-//     width: '100%', 
-//     height: '100%' 
-//   },
-//   featuredGradient: { 
-//     ...StyleSheet.absoluteFillObject, 
-//     justifyContent: 'space-between',
-//     padding: 16
-//   },
-//   featuredTopBadges: {
-//     flexDirection: 'row',
-//     justifyContent: 'flex-end'
-//   },
-//   // Badge BLANC avec texte JAUNE
-//   officialBadgeFeatured: { 
-//     flexDirection: 'row', 
-//     alignItems: 'center', 
-//     backgroundColor: '#fff',
-//     paddingHorizontal: 10, 
-//     paddingVertical: 5, 
-//     borderRadius: 16,
-//   },
-//   officialBadgeText: { 
-//     color: '#FEBD00',
-//     fontSize: 11, 
-//     marginLeft: 4,
-//     fontWeight: '600'
-//   },
-//   featuredInfo: {
-//     marginBottom: 4
-//   },
-//   featuredTitle: { 
-//     color: '#fff', 
-//     fontWeight: 'bold', 
-//     fontSize: 16,
-//     marginBottom: 4,
-//     lineHeight: 22
-//   },
-//   featuredCreator: {
-//     color: 'rgba(255,255,255,0.9)',
-//     fontSize: 13,
-//     marginBottom: 8
-//   },
-//   featuredMeta: { 
-//     flexDirection: 'row',
-//     gap: 12
-//   },
-//   featuredMetaItem: { 
-//     flexDirection: 'row', 
-//     alignItems: 'center',
-//     backgroundColor: 'rgba(255,255,255,0.2)',
-//     paddingHorizontal: 8,
-//     paddingVertical: 4,
-//     borderRadius: 12
-//   },
-//   featuredMetaText: { 
-//     color: '#fff', 
-//     fontSize: 12, 
-//     marginLeft: 4,
-//     fontWeight: '500'
-//   },
-//   // Play button en bas à droite - JAUNE
-//   playButtonOverlay: {
-//     position: 'absolute',
-//     bottom: 16,
-//     right: 16,
-//   },
+//   featuredImage: { width: "100%", height: "100%" },
+//   featuredGradient: { ...StyleSheet.absoluteFillObject, justifyContent: "space-between", padding: 16 },
+//   featuredTopBadges: { flexDirection: "row", justifyContent: "flex-end" },
+//   officialBadgeFeatured: { flexDirection: "row", alignItems: "center", backgroundColor: "#fff", paddingHorizontal: 10, paddingVertical: 5, borderRadius: 16 },
+//   officialBadgeText: { color: "#FEBD00", fontSize: 11, marginLeft: 4, fontWeight: "600" },
+//   featuredInfo: { marginBottom: 4 },
+//   featuredTitle: { color: "#fff", fontWeight: "bold", fontSize: 16, marginBottom: 4, lineHeight: 22 },
+//   featuredCreator: { color: "rgba(255,255,255,0.9)", fontSize: 13, marginBottom: 8 },
+//   featuredMeta: { flexDirection: "row", gap: 12 },
+//   featuredMetaItem: { flexDirection: "row", alignItems: "center", backgroundColor: "rgba(255,255,255,0.2)", paddingHorizontal: 8, paddingVertical: 4, borderRadius: 12 },
+//   featuredMetaText: { color: "#fff", fontSize: 12, marginLeft: 4, fontWeight: "500" },
+//   playButtonOverlay: { position: "absolute", bottom: 16, right: 16 },
 //   playButton: {
 //     width: 44,
 //     height: 44,
 //     borderRadius: 22,
-//     backgroundColor: '#FEBD00',
-//     justifyContent: 'center',
-//     alignItems: 'center',
+//     backgroundColor: "#FEBD00",
+//     justifyContent: "center",
+//     alignItems: "center",
 //     elevation: 8,
-//     shadowColor: '#000',
+//     shadowColor: "#000",
 //     shadowOffset: { width: 0, height: 4 },
 //     shadowOpacity: 0.3,
-//     shadowRadius: 8
+//     shadowRadius: 8,
 //   },
 
-//   // Recent section
-//   recentSection: { 
-//     marginTop: 16,
-//     paddingHorizontal: 20
-//   },
-//   refreshButton: {
-//     width: 36,
-//     height: 36,
-//     borderRadius: 18,
-//     backgroundColor: '#FFF8E1',
-//     justifyContent: 'center',
-//     alignItems: 'center'
-//   },
-//   recentList: {
-//     gap: 12
-//   },
-//   pathCard: { 
-//     flexDirection: 'row', 
-//     alignItems: 'center',
-//     backgroundColor: '#fff',
+//   recentSection: { marginTop: 16, paddingHorizontal: 20 },
+//   refreshButton: { width: 36, height: 36, borderRadius: 18, backgroundColor: "#FFF8E1", justifyContent: "center", alignItems: "center" },
+//   recentList: { gap: 12 },
+//   pathCard: {
+//     flexDirection: "row",
+//     alignItems: "center",
+//     backgroundColor: "#fff",
 //     borderRadius: 16,
-//     overflow: 'hidden',
+//     overflow: "hidden",
 //     elevation: 2,
-//     shadowColor: '#000',
+//     shadowColor: "#000",
 //     shadowOffset: { width: 0, height: 2 },
 //     shadowOpacity: 0.08,
 //     shadowRadius: 8,
-//     padding: 12
+//     padding: 12,
 //   },
-//   pathThumbnailContainer: {
-//     position: 'relative',
-//     width: 100,
-//     height: 100,
-//     borderRadius: 12,
-//     overflow: 'hidden'
-//   },
-//   pathThumbnail: { 
-//     width: '100%', 
-//     height: '100%'
-//   },
-//   officialBadgeSmall: { 
-//     position: 'absolute', 
-//     top: 6, 
-//     right: 6, 
-//     backgroundColor: 'rgba(255, 215, 0, 0.95)', 
+//   pathThumbnailContainer: { position: "relative", width: 100, height: 100, borderRadius: 12, overflow: "hidden" },
+//   pathThumbnail: { width: "100%", height: "100%" },
+//   officialBadgeSmall: {
+//     position: "absolute",
+//     top: 6,
+//     right: 6,
+//     backgroundColor: "rgba(255, 215, 0, 0.95)",
 //     width: 22,
 //     height: 22,
 //     borderRadius: 11,
-//     justifyContent: 'center',
-//     alignItems: 'center'
+//     justifyContent: "center",
+//     alignItems: "center",
 //   },
 //   thumbnailPlayButton: {
-//     position: 'absolute',
+//     position: "absolute",
 //     bottom: 6,
 //     right: 6,
 //     width: 28,
 //     height: 28,
 //     borderRadius: 14,
-//     backgroundColor: 'rgba(254, 189, 0, 0.95)',
-//     justifyContent: 'center',
-//     alignItems: 'center'
+//     backgroundColor: "rgba(254, 189, 0, 0.95)",
+//     justifyContent: "center",
+//     alignItems: "center",
 //   },
-//   pathInfo: { 
-//     flex: 1, 
-//     marginLeft: 16,
-//     justifyContent: 'center'
-//   },
-//   pathTitle: { 
-//     fontSize: 15, 
-//     fontWeight: '700', 
-//     color: '#1a1a1a',
-//     marginBottom: 4,
-//     lineHeight: 20
-//   },
-//   pathCreator: { 
-//     fontSize: 13, 
-//     color: '#666',
-//     marginBottom: 6
-//   },
-//   pathMeta: { 
-//     flexDirection: 'row',
-//     gap: 12
-//   },
-//   metaItem: { 
-//     flexDirection: 'row', 
-//     alignItems: 'center'
-//   },
-//   metaText: { 
-//     fontSize: 12, 
-//     color: '#999', 
-//     marginLeft: 4,
-//     fontWeight: '500'
-//   },
-//   cardActions: {
-//     flexDirection: 'row',
-//     alignItems: 'center',
-//     marginLeft: 4
-//   },
-//   favoriteButton: { 
-//     padding: 8
-//   },
-//   deleteButton: {
-//     padding: 8,
-//     marginLeft: 4
-//   },
-//   bottomSpacing: {
-//     height: 32
-//   }
+//   pathInfo: { flex: 1, marginLeft: 16, justifyContent: "center" },
+//   pathTitle: { fontSize: 15, fontWeight: "700", color: "#1a1a1a", marginBottom: 4, lineHeight: 20 },
+//   pathCreator: { fontSize: 13, color: "#666", marginBottom: 6 },
+//   pathMeta: { flexDirection: "row", gap: 12 },
+//   metaItem: { flexDirection: "row", alignItems: "center" },
+//   metaText: { fontSize: 12, color: "#999", marginLeft: 4, fontWeight: "500" },
+//   cardActions: { flexDirection: "row", alignItems: "center", marginLeft: 4 },
+//   favoriteButton: { padding: 8 },
+//   deleteButton: { padding: 8, marginLeft: 4 },
+//   bottomSpacing: { height: 32 },
 // });
+
+
 // /Users/antayussuf/Desktop/volkeno/tektal-mobile/src/screens/TableauDeBord/Accueil.js
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import {
   View,
   Text,
@@ -690,52 +513,62 @@ import {
   Dimensions,
   StatusBar,
   Alert,
-} from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
-import { LinearGradient } from 'expo-linear-gradient';
-import { usePaths } from '../../context/PathContext';
-import { getProfile } from '../../services/authService';
+} from "react-native";
+import { useDispatch, useSelector } from "react-redux";
+import { Ionicons } from "@expo/vector-icons";
+import { LinearGradient } from "expo-linear-gradient";
+import { usePaths } from "../../context/PathContext";
+import { getProfile } from "../../services/authService";
+import { setAuth } from "../../store/authSlice";
 
-const { width } = Dimensions.get('window');
+const { width } = Dimensions.get("window");
 const CARD_WIDTH = width * 0.65;
 
 export default function Accueil({ navigation }) {
+  const dispatch = useDispatch();
+  const reduxUser = useSelector((state) => state.auth.user);
+
   const { paths, loading, toggleFavorite, refreshPaths, deletePath } = usePaths();
+
   const [refreshing, setRefreshing] = useState(false);
-  const [userName, setUserName] = useState("Utilisateur");
+  const [profileLoading, setProfileLoading] = useState(false);
+
+  const userName = useMemo(() => {
+    return (
+      reduxUser?.full_name ||
+      reduxUser?.name ||
+      (reduxUser?.email ? reduxUser.email.split("@")[0] : "Utilisateur")
+    );
+  }, [reduxUser]);
+
+  const syncProfile = useCallback(async () => {
+    setProfileLoading(true);
+    try {
+      const res = await getProfile();
+      if (res?.ok && res.data) {
+        dispatch(setAuth(res.data));
+      }
+    } catch {
+      // ignore profile sync errors in Accueil
+    } finally {
+      setProfileLoading(false);
+    }
+  }, [dispatch]);
 
   useEffect(() => {
-    let mounted = true;
-
-    const loadUser = async () => {
-      try {
-        const res = await getProfile();
-        if (!mounted || !res?.ok) return;
-        const user = res.data || {};
-        setUserName(
-          user.full_name ||
-          user.name ||
-          (user.email ? user.email.split("@")[0] : "Utilisateur")
-        );
-      } catch (e) {
-        // ignore
-      }
-    };
-
-    loadUser();
-    return () => {
-      mounted = false;
-    };
-  }, []);
+    if (!reduxUser) {
+      syncProfile();
+    }
+  }, [reduxUser, syncProfile]);
 
   const onRefresh = async () => {
     setRefreshing(true);
-    await refreshPaths();
+    await Promise.all([refreshPaths(), syncProfile()]);
     setRefreshing(false);
   };
 
   const handleOpenPath = (path) => {
-    navigation.navigate('VideoPlayer', { path });
+    navigation.navigate("VideoPlayer", { path });
   };
 
   const handleToggleFavorite = async (id) => {
@@ -744,27 +577,27 @@ export default function Accueil({ navigation }) {
 
   const handleDeletePath = (path) => {
     Alert.alert(
-      'Supprimer le chemin',
+      "Supprimer le chemin",
       `Êtes-vous sûr de vouloir supprimer "${path.title}" ?`,
       [
-        { text: 'Annuler', style: 'cancel' },
+        { text: "Annuler", style: "cancel" },
         {
-          text: 'Supprimer',
-          style: 'destructive',
+          text: "Supprimer",
+          style: "destructive",
           onPress: async () => {
             await deletePath(path.id);
             await refreshPaths();
-          }
-        }
+          },
+        },
       ]
     );
   };
 
-  if (loading) {
+  if (loading || profileLoading) {
     return (
       <View style={styles.loadingContainer}>
         <ActivityIndicator size="large" color="#FEBD00" />
-        <Text style={styles.loadingText}>Chargement des chemins...</Text>
+        <Text style={styles.loadingText}>Chargement...</Text>
       </View>
     );
   }
@@ -774,7 +607,7 @@ export default function Accueil({ navigation }) {
       <View style={styles.container}>
         <StatusBar barStyle="light-content" />
         <LinearGradient
-          colors={['#FFC837', '#FEBD00']}
+          colors={["#FFC837", "#FEBD00"]}
           style={styles.header}
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 1 }}
@@ -805,11 +638,11 @@ export default function Accueil({ navigation }) {
           </Text>
           <TouchableOpacity
             style={styles.createButton}
-            onPress={() => navigation.navigate('Ajouter')}
+            onPress={() => navigation.navigate("Ajouter")}
             activeOpacity={0.8}
           >
             <LinearGradient
-              colors={['#FFC837', '#FEBD00']}
+              colors={["#FFC837", "#FEBD00"]}
               style={styles.createButtonGradient}
               start={{ x: 0, y: 0 }}
               end={{ x: 1, y: 0 }}
@@ -832,14 +665,14 @@ export default function Accueil({ navigation }) {
           refreshing={refreshing}
           onRefresh={onRefresh}
           tintColor="#FEBD00"
-          colors={['#FEBD00']}
+          colors={["#FEBD00"]}
         />
       }
     >
       <StatusBar barStyle="light-content" />
 
       <LinearGradient
-        colors={['#FFC837', '#FEBD00']}
+        colors={["#FFC837", "#FEBD00"]}
         style={styles.header}
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 1 }}
@@ -882,7 +715,7 @@ export default function Accueil({ navigation }) {
               activeOpacity={0.9}
             >
               <Image source={{ uri: path.thumbnail }} style={styles.featuredImage} resizeMode="cover" />
-              <LinearGradient colors={['transparent', 'rgba(0,0,0,0.85)']} style={styles.featuredGradient}>
+              <LinearGradient colors={["transparent", "rgba(0,0,0,0.85)"]} style={styles.featuredGradient}>
                 <View style={styles.featuredTopBadges}>
                   {path.isOfficial && (
                     <View style={styles.officialBadgeFeatured}>
@@ -893,8 +726,12 @@ export default function Accueil({ navigation }) {
                 </View>
 
                 <View style={styles.featuredInfo}>
-                  <Text style={styles.featuredTitle} numberOfLines={2}>{path.title}</Text>
-                  <Text style={styles.featuredCreator} numberOfLines={1}>Par {path.creator}</Text>
+                  <Text style={styles.featuredTitle} numberOfLines={2}>
+                    {path.title}
+                  </Text>
+                  <Text style={styles.featuredCreator} numberOfLines={1}>
+                    Par {path.creator}
+                  </Text>
                   <View style={styles.featuredMeta}>
                     <View style={styles.featuredMetaItem}>
                       <Ionicons name="time-outline" size={13} color="#fff" />
@@ -947,8 +784,12 @@ export default function Accueil({ navigation }) {
               </View>
 
               <View style={styles.pathInfo}>
-                <Text style={styles.pathTitle} numberOfLines={2}>{path.title}</Text>
-                <Text style={styles.pathCreator} numberOfLines={1}>Par {path.creator}</Text>
+                <Text style={styles.pathTitle} numberOfLines={2}>
+                  {path.title}
+                </Text>
+                <Text style={styles.pathCreator} numberOfLines={1}>
+                  Par {path.creator}
+                </Text>
                 <View style={styles.pathMeta}>
                   <View style={styles.metaItem}>
                     <Ionicons name="time-outline" size={12} color="#999" />
@@ -962,11 +803,23 @@ export default function Accueil({ navigation }) {
               </View>
 
               <View style={styles.cardActions}>
-                <TouchableOpacity style={styles.favoriteButton} onPress={() => handleToggleFavorite(path.id)} activeOpacity={0.6}>
-                  <Ionicons name={path.isFavorite ? 'heart' : 'heart-outline'} size={24} color={path.isFavorite ? '#FF3B30' : '#ccc'} />
+                <TouchableOpacity
+                  style={styles.favoriteButton}
+                  onPress={() => handleToggleFavorite(path.id)}
+                  activeOpacity={0.6}
+                >
+                  <Ionicons
+                    name={path.isFavorite ? "heart" : "heart-outline"}
+                    size={24}
+                    color={path.isFavorite ? "#FF3B30" : "#ccc"}
+                  />
                 </TouchableOpacity>
 
-                <TouchableOpacity style={styles.deleteButton} onPress={() => handleDeletePath(path)} activeOpacity={0.6}>
+                <TouchableOpacity
+                  style={styles.deleteButton}
+                  onPress={() => handleDeletePath(path)}
+                  activeOpacity={0.6}
+                >
                   <Ionicons name="trash-outline" size={22} color="#FF3B30" />
                 </TouchableOpacity>
               </View>
@@ -981,92 +834,162 @@ export default function Accueil({ navigation }) {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#F8F9FA' },
-  loadingContainer: { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#F8F9FA' },
-  loadingText: { marginTop: 16, fontSize: 16, color: '#666', fontWeight: '500' },
+  container: { flex: 1, backgroundColor: "#F8F9FA" },
+  loadingContainer: { flex: 1, justifyContent: "center", alignItems: "center", backgroundColor: "#F8F9FA" },
+  loadingText: { marginTop: 16, fontSize: 16, color: "#666", fontWeight: "500" },
 
   header: { paddingTop: 60, paddingBottom: 20, paddingHorizontal: 20 },
-  headerContent: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-  headerGreeting: { fontSize: 16, fontWeight: '500', color: 'rgba(255,255,255,0.9)', marginBottom: 4 },
-  headerTitle: { fontSize: 28, fontWeight: 'bold', color: '#fff', letterSpacing: 0.5 },
+  headerContent: { flexDirection: "row", justifyContent: "space-between", alignItems: "center" },
+  headerGreeting: { fontSize: 16, fontWeight: "500", color: "rgba(255,255,255,0.9)", marginBottom: 4 },
+  headerTitle: { fontSize: 28, fontWeight: "bold", color: "#fff", letterSpacing: 0.5 },
   notificationButton: { padding: 8 },
   notificationIconContainer: {
-    position: 'relative', width: 40, height: 40, borderRadius: 20,
-    backgroundColor: 'rgba(255,255,255,0.2)', justifyContent: 'center', alignItems: 'center'
+    position: "relative",
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: "rgba(255,255,255,0.2)",
+    justifyContent: "center",
+    alignItems: "center",
   },
   notificationBadge: {
-    position: 'absolute', top: -2, right: -2, backgroundColor: '#FF3B30',
-    minWidth: 18, height: 18, borderRadius: 9, justifyContent: 'center',
-    alignItems: 'center', paddingHorizontal: 4, borderWidth: 2, borderColor: '#FFC837'
+    position: "absolute",
+    top: -2,
+    right: -2,
+    backgroundColor: "#FF3B30",
+    minWidth: 18,
+    height: 18,
+    borderRadius: 9,
+    justifyContent: "center",
+    alignItems: "center",
+    paddingHorizontal: 4,
+    borderWidth: 2,
+    borderColor: "#FFC837",
   },
-  notificationBadgeText: { color: '#fff', fontSize: 10, fontWeight: 'bold' },
+  notificationBadgeText: { color: "#fff", fontSize: 10, fontWeight: "bold" },
 
-  emptyContainer: { flex: 1, justifyContent: 'center', alignItems: 'center', padding: 32, marginTop: 40 },
+  emptyContainer: { flex: 1, justifyContent: "center", alignItems: "center", padding: 32, marginTop: 40 },
   emptyIconContainer: {
-    width: 140, height: 140, borderRadius: 70, backgroundColor: '#FFF8E1',
-    justifyContent: 'center', alignItems: 'center', marginBottom: 24
+    width: 140,
+    height: 140,
+    borderRadius: 70,
+    backgroundColor: "#FFF8E1",
+    justifyContent: "center",
+    alignItems: "center",
+    marginBottom: 24,
   },
-  emptyTitle: { fontSize: 22, fontWeight: 'bold', color: '#1a1a1a', marginBottom: 12, textAlign: 'center' },
-  emptyText: { fontSize: 15, color: '#666', textAlign: 'center', lineHeight: 22, marginBottom: 32, paddingHorizontal: 20 },
+  emptyTitle: { fontSize: 22, fontWeight: "bold", color: "#1a1a1a", marginBottom: 12, textAlign: "center" },
+  emptyText: {
+    fontSize: 15,
+    color: "#666",
+    textAlign: "center",
+    lineHeight: 22,
+    marginBottom: 32,
+    paddingHorizontal: 20,
+  },
   createButton: {
-    borderRadius: 28, overflow: 'hidden', elevation: 4, shadowColor: '#FEBD00',
-    shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.3, shadowRadius: 8
+    borderRadius: 28,
+    overflow: "hidden",
+    elevation: 4,
+    shadowColor: "#FEBD00",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
   },
-  createButtonGradient: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 28, paddingVertical: 14 },
-  createButtonText: { color: '#fff', fontWeight: 'bold', marginLeft: 8, fontSize: 16 },
+  createButtonGradient: { flexDirection: "row", alignItems: "center", paddingHorizontal: 28, paddingVertical: 14 },
+  createButtonText: { color: "#fff", fontWeight: "bold", marginLeft: 8, fontSize: 16 },
 
   featuredSection: { marginTop: 24, marginBottom: 8 },
-  sectionHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 20, marginBottom: 16 },
-  sectionTitle: { fontSize: 20, fontWeight: 'bold', color: '#1a1a1a', letterSpacing: 0.3 },
+  sectionHeader: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", paddingHorizontal: 20, marginBottom: 16 },
+  sectionTitle: { fontSize: 20, fontWeight: "bold", color: "#1a1a1a", letterSpacing: 0.3 },
   featuredScroll: { paddingRight: 20 },
   featuredCard: {
-    width: CARD_WIDTH, height: 200, marginRight: 8, borderRadius: 20, overflow: 'hidden',
-    elevation: 6, shadowColor: '#000', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.15, shadowRadius: 12, backgroundColor: '#fff'
+    width: CARD_WIDTH,
+    height: 200,
+    marginRight: 8,
+    borderRadius: 20,
+    overflow: "hidden",
+    elevation: 6,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.15,
+    shadowRadius: 12,
+    backgroundColor: "#fff",
   },
-  featuredImage: { width: '100%', height: '100%' },
-  featuredGradient: { ...StyleSheet.absoluteFillObject, justifyContent: 'space-between', padding: 16 },
-  featuredTopBadges: { flexDirection: 'row', justifyContent: 'flex-end' },
-  officialBadgeFeatured: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#fff', paddingHorizontal: 10, paddingVertical: 5, borderRadius: 16 },
-  officialBadgeText: { color: '#FEBD00', fontSize: 11, marginLeft: 4, fontWeight: '600' },
+  featuredImage: { width: "100%", height: "100%" },
+  featuredGradient: { ...StyleSheet.absoluteFillObject, justifyContent: "space-between", padding: 16 },
+  featuredTopBadges: { flexDirection: "row", justifyContent: "flex-end" },
+  officialBadgeFeatured: { flexDirection: "row", alignItems: "center", backgroundColor: "#fff", paddingHorizontal: 10, paddingVertical: 5, borderRadius: 16 },
+  officialBadgeText: { color: "#FEBD00", fontSize: 11, marginLeft: 4, fontWeight: "600" },
   featuredInfo: { marginBottom: 4 },
-  featuredTitle: { color: '#fff', fontWeight: 'bold', fontSize: 16, marginBottom: 4, lineHeight: 22 },
-  featuredCreator: { color: 'rgba(255,255,255,0.9)', fontSize: 13, marginBottom: 8 },
-  featuredMeta: { flexDirection: 'row', gap: 12 },
-  featuredMetaItem: { flexDirection: 'row', alignItems: 'center', backgroundColor: 'rgba(255,255,255,0.2)', paddingHorizontal: 8, paddingVertical: 4, borderRadius: 12 },
-  featuredMetaText: { color: '#fff', fontSize: 12, marginLeft: 4, fontWeight: '500' },
-  playButtonOverlay: { position: 'absolute', bottom: 16, right: 16 },
+  featuredTitle: { color: "#fff", fontWeight: "bold", fontSize: 16, marginBottom: 4, lineHeight: 22 },
+  featuredCreator: { color: "rgba(255,255,255,0.9)", fontSize: 13, marginBottom: 8 },
+  featuredMeta: { flexDirection: "row", gap: 12 },
+  featuredMetaItem: { flexDirection: "row", alignItems: "center", backgroundColor: "rgba(255,255,255,0.2)", paddingHorizontal: 8, paddingVertical: 4, borderRadius: 12 },
+  featuredMetaText: { color: "#fff", fontSize: 12, marginLeft: 4, fontWeight: "500" },
+  playButtonOverlay: { position: "absolute", bottom: 16, right: 16 },
   playButton: {
-    width: 44, height: 44, borderRadius: 22, backgroundColor: '#FEBD00',
-    justifyContent: 'center', alignItems: 'center', elevation: 8, shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.3, shadowRadius: 8
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: "#FEBD00",
+    justifyContent: "center",
+    alignItems: "center",
+    elevation: 8,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
   },
 
   recentSection: { marginTop: 16, paddingHorizontal: 20 },
-  refreshButton: { width: 36, height: 36, borderRadius: 18, backgroundColor: '#FFF8E1', justifyContent: 'center', alignItems: 'center' },
+  refreshButton: { width: 36, height: 36, borderRadius: 18, backgroundColor: "#FFF8E1", justifyContent: "center", alignItems: "center" },
   recentList: { gap: 12 },
   pathCard: {
-    flexDirection: 'row', alignItems: 'center', backgroundColor: '#fff', borderRadius: 16,
-    overflow: 'hidden', elevation: 2, shadowColor: '#000', shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.08, shadowRadius: 8, padding: 12
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#fff",
+    borderRadius: 16,
+    overflow: "hidden",
+    elevation: 2,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
+    padding: 12,
   },
-  pathThumbnailContainer: { position: 'relative', width: 100, height: 100, borderRadius: 12, overflow: 'hidden' },
-  pathThumbnail: { width: '100%', height: '100%' },
+  pathThumbnailContainer: { position: "relative", width: 100, height: 100, borderRadius: 12, overflow: "hidden" },
+  pathThumbnail: { width: "100%", height: "100%" },
   officialBadgeSmall: {
-    position: 'absolute', top: 6, right: 6, backgroundColor: 'rgba(255, 215, 0, 0.95)',
-    width: 22, height: 22, borderRadius: 11, justifyContent: 'center', alignItems: 'center'
+    position: "absolute",
+    top: 6,
+    right: 6,
+    backgroundColor: "rgba(255, 215, 0, 0.95)",
+    width: 22,
+    height: 22,
+    borderRadius: 11,
+    justifyContent: "center",
+    alignItems: "center",
   },
   thumbnailPlayButton: {
-    position: 'absolute', bottom: 6, right: 6, width: 28, height: 28, borderRadius: 14,
-    backgroundColor: 'rgba(254, 189, 0, 0.95)', justifyContent: 'center', alignItems: 'center'
+    position: "absolute",
+    bottom: 6,
+    right: 6,
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    backgroundColor: "rgba(254, 189, 0, 0.95)",
+    justifyContent: "center",
+    alignItems: "center",
   },
-  pathInfo: { flex: 1, marginLeft: 16, justifyContent: 'center' },
-  pathTitle: { fontSize: 15, fontWeight: '700', color: '#1a1a1a', marginBottom: 4, lineHeight: 20 },
-  pathCreator: { fontSize: 13, color: '#666', marginBottom: 6 },
-  pathMeta: { flexDirection: 'row', gap: 12 },
-  metaItem: { flexDirection: 'row', alignItems: 'center' },
-  metaText: { fontSize: 12, color: '#999', marginLeft: 4, fontWeight: '500' },
-  cardActions: { flexDirection: 'row', alignItems: 'center', marginLeft: 4 },
+  pathInfo: { flex: 1, marginLeft: 16, justifyContent: "center" },
+  pathTitle: { fontSize: 15, fontWeight: "700", color: "#1a1a1a", marginBottom: 4, lineHeight: 20 },
+  pathCreator: { fontSize: 13, color: "#666", marginBottom: 6 },
+  pathMeta: { flexDirection: "row", gap: 12 },
+  metaItem: { flexDirection: "row", alignItems: "center" },
+  metaText: { fontSize: 12, color: "#999", marginLeft: 4, fontWeight: "500" },
+  cardActions: { flexDirection: "row", alignItems: "center", marginLeft: 4 },
   favoriteButton: { padding: 8 },
   deleteButton: { padding: 8, marginLeft: 4 },
-  bottomSpacing: { height: 32 }
+  bottomSpacing: { height: 32 },
 });
