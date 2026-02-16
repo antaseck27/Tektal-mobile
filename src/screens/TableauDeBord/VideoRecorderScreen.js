@@ -7,22 +7,19 @@ import {
   TouchableOpacity,
   Alert,
   ActivityIndicator,
-  TextInput,
-  KeyboardAvoidingView,
-  Platform,
-  ScrollView,
+  Dimensions,
 } from 'react-native';
 import { CameraView, useCameraPermissions, useMicrophonePermissions } from 'expo-camera';
 import { useVideoPlayer, VideoView } from 'expo-video';
 import { Ionicons } from '@expo/vector-icons';
 import * as MediaLibrary from 'expo-media-library';
 import * as Location from 'expo-location';
-import { usePaths } from '../../context/PathContext';
 import { LinearGradient } from 'expo-linear-gradient';
+
+const { height } = Dimensions.get('window');
 
 export default function VideoRecorderScreen({ route, navigation }) {
   const { departure, destination, pathType } = route.params;
-  const { addPath } = usePaths();
 
   const [cameraPermission, requestCameraPermission] = useCameraPermissions();
   const [microphonePermission, requestMicrophonePermission] = useMicrophonePermissions();
@@ -30,13 +27,11 @@ export default function VideoRecorderScreen({ route, navigation }) {
   const [locationPermission, requestLocationPermission] = Location.useForegroundPermissions();
 
   // ✅ États
-  const [step, setStep] = useState('description'); // 'description' | 'recording' | 'preview'
-  const [description, setDescription] = useState('');
+  const [step, setStep] = useState('recording'); // 'recording' | 'preview'
   const [isRecording, setIsRecording] = useState(false);
   const [videoUri, setVideoUri] = useState(null);
   const [recordingTime, setRecordingTime] = useState(0);
   const [facing, setFacing] = useState('back');
-  const [isSaving, setIsSaving] = useState(false);
   
   const [coordinates, setCoordinates] = useState([]);
   const [currentLocation, setCurrentLocation] = useState(null);
@@ -45,7 +40,7 @@ export default function VideoRecorderScreen({ route, navigation }) {
   const timerRef = useRef(null);
   const locationSubscription = useRef(null);
 
-  const MAX_RECORDING_TIME = 45;
+  const MAX_RECORDING_TIME = 120;
 
   const player = useVideoPlayer(videoUri || '', player => {
     if (videoUri) {
@@ -106,15 +101,6 @@ export default function VideoRecorderScreen({ route, navigation }) {
     };
   }, [isRecording]);
 
-  // ✅ Passer à l'étape enregistrement
-  const handleStartRecording = () => {
-    if (!description.trim()) {
-      Alert.alert('Description manquante', 'Veuillez ajouter une description du trajet');
-      return;
-    }
-    setStep('recording');
-  };
-
   const startRecording = async () => {
     if (cameraRef.current) {
       try {
@@ -135,7 +121,7 @@ export default function VideoRecorderScreen({ route, navigation }) {
                 longitude: location.coords.longitude,
                 timestamp: Date.now(),
               };
-              
+             
               setCoordinates((prev) => [...prev, newCoord]);
               console.log('📍 GPS:', newCoord);
             }
@@ -157,7 +143,7 @@ export default function VideoRecorderScreen({ route, navigation }) {
         console.log('Erreur enregistrement:', error);
         Alert.alert('Erreur', 'Impossible d\'enregistrer la vidéo');
         setIsRecording(false);
-        
+       
         if (locationSubscription.current) {
           locationSubscription.current.remove();
         }
@@ -169,7 +155,7 @@ export default function VideoRecorderScreen({ route, navigation }) {
     if (cameraRef.current && isRecording) {
       cameraRef.current.stopRecording();
       setIsRecording(false);
-      
+     
       if (locationSubscription.current) {
         locationSubscription.current.remove();
       }
@@ -183,74 +169,23 @@ export default function VideoRecorderScreen({ route, navigation }) {
     setStep('recording');
   };
 
-  const handleValidate = async () => {
+  // ✅ Navigation vers StepCreation au lieu de sauvegarder directement
+  const handleValidate = () => {
     if (!videoUri) {
       Alert.alert('Erreur', 'Aucune vidéo enregistrée');
       return;
     }
 
-    setIsSaving(true);
-
-    try {
-      const pathData = {
-        title: `${departure} → ${destination}`,
-        departure,
-        destination,
-        pathType,
-        videoUri,
-        duration: `${recordingTime} sec`,
-        steps: 0,
-        creator: 'Mamadou',
-        campus: 'Bakeli Dakar',
-        isOfficial: pathType === 'official',
-        isFavorite: false,
-        thumbnail: videoUri,
-        views: 0,
-        likes: 0,
-        coordinates: coordinates.length > 0 ? coordinates : null,
-        startLocation: coordinates.length > 0 ? coordinates[0] : currentLocation,
-        endLocation: coordinates.length > 0 ? coordinates[coordinates.length - 1] : null,
-        description: description.trim(),
-      };
-
-      console.log('📍 Nombre de points GPS enregistrés:', coordinates.length);
-      console.log('Sauvegarde du chemin:', pathData);
-
-      const result = await addPath(pathData);
-
-      setIsSaving(false);
-
-      if (result.success) {
-        Alert.alert(
-          '🎉 Chemin publié !',
-          `Vidéo enregistrée avec ${coordinates.length} points GPS`,
-          [
-            {
-              text: 'Voir mes chemins',
-              onPress: () => {
-                navigation.reset({
-                  index: 0,
-                  routes: [
-                    {
-                      name: 'Dashboard',
-                      state: {
-                        routes: [{ name: 'Accueil' }],
-                      },
-                    },
-                  ],
-                });
-              },
-            },
-          ]
-        );
-      } else {
-        Alert.alert('Erreur', 'Impossible de sauvegarder le chemin');
-      }
-    } catch (error) {
-      setIsSaving(false);
-      console.error('Erreur validation:', error);
-      Alert.alert('Erreur', 'Une erreur est survenue lors de la sauvegarde');
-    }
+    // ✅ Naviguer vers l'écran de création des steps
+    navigation.navigate('StepCreation', {
+      videoUri,
+      videoDuration: recordingTime,
+      departure,
+      destination,
+      pathType,
+      startLocation: coordinates.length > 0 ? coordinates[0] : currentLocation,
+      endLocation: coordinates.length > 0 ? coordinates[coordinates.length - 1] : currentLocation,
+    });
   };
 
   const formatTime = (seconds) => {
@@ -294,106 +229,7 @@ export default function VideoRecorderScreen({ route, navigation }) {
     );
   }
 
-  // ✅ ÉTAPE 1: DESCRIPTION
-  if (step === 'description') {
-    return (
-      <KeyboardAvoidingView 
-        style={styles.container}
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-      >
-        <LinearGradient
-          colors={['#FEBD00', '#FFD700']}
-          style={styles.descriptionScreenGradient}
-        >
-          <ScrollView 
-            contentContainerStyle={styles.descriptionScreenContent}
-            keyboardShouldPersistTaps="handled"
-          >
-            {/* Header */}
-            <View style={styles.descriptionScreenHeader}>
-              <TouchableOpacity
-                style={styles.closeButtonWhite}
-                onPress={() => navigation.goBack()}
-              >
-                <Ionicons name="close" size={30} color="#333" />
-              </TouchableOpacity>
-            </View>
-
-            {/* Icône */}
-            <View style={styles.descriptionIconContainer}>
-              <View style={styles.descriptionIconCircle}>
-                <Ionicons name="document-text" size={60} color="#FEBD00" />
-              </View>
-            </View>
-
-            {/* Titre */}
-            <Text style={styles.descriptionScreenTitle}>
-              Décrivez votre trajet
-            </Text>
-            <Text style={styles.descriptionScreenSubtitle}>
-              {departure} → {destination}
-            </Text>
-
-            {/* Champ de description */}
-            <View style={styles.descriptionCard}>
-              <Text style={styles.descriptionLabel}>
-                Description du trajet
-              </Text>
-              <TextInput
-                style={styles.descriptionInput}
-                placeholder="Ex: Passer par la grande porte, tourner à droite après le bâtiment A, prendre l'escalier au fond du couloir..."
-                placeholderTextColor="#999"
-                value={description}
-                onChangeText={setDescription}
-                multiline
-                numberOfLines={6}
-                maxLength={500}
-                textAlignVertical="top"
-                autoFocus
-              />
-              <View style={styles.descriptionFooter}>
-                <Text style={styles.characterCount}>
-                  {description.length}/500 caractères
-                </Text>
-                {description.length >= 20 && (
-                  <Ionicons name="checkmark-circle" size={20} color="#34C759" />
-                )}
-              </View>
-            </View>
-
-            {/* Conseils */}
-            <View style={styles.tipsCard}>
-              <Text style={styles.tipsTitle}>
-                <Ionicons name="bulb" size={16} color="#FEBD00" /> Conseils
-              </Text>
-              <Text style={styles.tipsText}>
-                • Décrivez les points de repère visibles{'\n'}
-                • Mentionnez les virages et changements de direction{'\n'}
-                • Indiquez les obstacles ou difficultés éventuels
-              </Text>
-            </View>
-
-            {/* Bouton suivant */}
-            <TouchableOpacity
-              style={[
-                styles.nextButton,
-                !description.trim() && styles.nextButtonDisabled
-              ]}
-              onPress={handleStartRecording}
-              disabled={!description.trim()}
-            >
-              <Text style={styles.nextButtonText}>
-                Commencer l'enregistrement
-              </Text>
-              <Ionicons name="arrow-forward" size={24} color="#fff" />
-            </TouchableOpacity>
-          </ScrollView>
-        </LinearGradient>
-      </KeyboardAvoidingView>
-    );
-  }
-
-  // ✅ ÉTAPE 2: ENREGISTREMENT
+  // ✅ ÉTAPE ENREGISTREMENT
   if (step === 'recording') {
     return (
       <View style={styles.container}>
@@ -407,7 +243,7 @@ export default function VideoRecorderScreen({ route, navigation }) {
             <View style={styles.header}>
               <TouchableOpacity
                 style={styles.closeButton}
-                onPress={() => setStep('description')}
+                onPress={() => navigation.goBack()}
               >
                 <Ionicons name="arrow-back" size={30} color="#fff" />
               </TouchableOpacity>
@@ -430,10 +266,10 @@ export default function VideoRecorderScreen({ route, navigation }) {
             </View>
 
             <View style={styles.gpsIndicator}>
-              <Ionicons 
-                name={currentLocation ? "location" : "location-outline"} 
-                size={16} 
-                color={currentLocation ? "#34C759" : "#999"} 
+              <Ionicons
+                name={currentLocation ? "location" : "location-outline"}
+                size={16}
+                color={currentLocation ? "#34C759" : "#999"}
               />
               <Text style={styles.gpsIndicatorText}>
                 {currentLocation ? "GPS actif" : "En attente GPS..."}
@@ -487,7 +323,7 @@ export default function VideoRecorderScreen({ route, navigation }) {
     );
   }
 
-  // ✅ ÉTAPE 3: PRÉVISUALISATION
+  // ✅ ÉTAPE PRÉVISUALISATION
   if (step === 'preview') {
     return (
       <View style={styles.container}>
@@ -518,7 +354,6 @@ export default function VideoRecorderScreen({ route, navigation }) {
           <TouchableOpacity
             style={[styles.actionButton, styles.retakeButton]}
             onPress={retakeVideo}
-            disabled={isSaving}
           >
             <Ionicons name="refresh" size={24} color="#fff" />
             <Text style={styles.actionButtonText}>Refaire</Text>
@@ -527,27 +362,11 @@ export default function VideoRecorderScreen({ route, navigation }) {
           <TouchableOpacity
             style={[styles.actionButton, styles.validateButton]}
             onPress={handleValidate}
-            disabled={isSaving}
           >
-            {isSaving ? (
-              <ActivityIndicator color="#fff" size="small" />
-            ) : (
-              <>
-                <Ionicons name="checkmark" size={24} color="#fff" />
-                <Text style={styles.actionButtonText}>Publier</Text>
-              </>
-            )}
+            <Ionicons name="arrow-forward" size={24} color="#fff" />
+            <Text style={styles.actionButtonText}>Continuer</Text>
           </TouchableOpacity>
         </View>
-
-        {isSaving && (
-          <View style={styles.savingOverlay}>
-            <View style={styles.savingBox}>
-              <ActivityIndicator size="large" color="#FEBD00" />
-              <Text style={styles.savingText}>Publication en cours...</Text>
-            </View>
-          </View>
-        )}
       </View>
     );
   }
@@ -569,137 +388,6 @@ const styles = StyleSheet.create({
   video: {
     flex: 1,
     backgroundColor: '#000',
-  },
-  
-  // DESCRIPTION SCREEN
-  descriptionScreenGradient: {
-    flex: 1,
-  },
-  descriptionScreenContent: {
-    flexGrow: 1,
-    paddingHorizontal: 20,
-    paddingBottom: 40,
-  },
-  descriptionScreenHeader: {
-    paddingTop: 60,
-    paddingBottom: 20,
-    alignItems: 'flex-start',
-  },
-  closeButtonWhite: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    backgroundColor: 'rgba(255,255,255,0.3)',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  descriptionIconContainer: {
-    alignItems: 'center',
-    marginTop: 20,
-    marginBottom: 30,
-  },
-  descriptionIconCircle: {
-    width: 120,
-    height: 120,
-    borderRadius: 60,
-    backgroundColor: '#fff',
-    justifyContent: 'center',
-    alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.2,
-    shadowRadius: 8,
-    elevation: 5,
-  },
-  descriptionScreenTitle: {
-    fontSize: 28,
-    fontWeight: 'bold',
-    color: '#333',
-    textAlign: 'center',
-    marginBottom: 8,
-  },
-  descriptionScreenSubtitle: {
-    fontSize: 16,
-    color: '#666',
-    textAlign: 'center',
-    marginBottom: 30,
-  },
-  descriptionCard: {
-    backgroundColor: '#fff',
-    borderRadius: 16,
-    padding: 20,
-    marginBottom: 20,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-    elevation: 3,
-  },
-  descriptionLabel: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: '#333',
-    marginBottom: 12,
-  },
-  descriptionInput: {
-    backgroundColor: '#f5f5f5',
-    borderRadius: 12,
-    padding: 16,
-    fontSize: 15,
-    color: '#333',
-    minHeight: 150,
-    borderWidth: 2,
-    borderColor: '#FEBD00',
-  },
-  descriptionFooter: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginTop: 12,
-  },
-  characterCount: {
-    fontSize: 12,
-    color: '#999',
-  },
-  tipsCard: {
-    backgroundColor: 'rgba(255,255,255,0.9)',
-    borderRadius: 12,
-    padding: 16,
-    marginBottom: 30,
-  },
-  tipsTitle: {
-    fontSize: 14,
-    fontWeight: 'bold',
-    color: '#333',
-    marginBottom: 8,
-  },
-  tipsText: {
-    fontSize: 13,
-    color: '#666',
-    lineHeight: 20,
-  },
-  nextButton: {
-    backgroundColor: '#333',
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingVertical: 16,
-    borderRadius: 25,
-    gap: 10,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 5,
-  },
-  nextButtonDisabled: {
-    backgroundColor: '#ccc',
-    opacity: 0.6,
-  },
-  nextButtonText: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: '#fff',
   },
 
   // Permissions & Loading
@@ -953,23 +641,5 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: 16,
     fontWeight: 'bold',
-  },
-  savingOverlay: {
-    ...StyleSheet.absoluteFillObject,
-    backgroundColor: 'rgba(0,0,0,0.7)',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  savingBox: {
-    backgroundColor: 'rgba(255,255,255,0.95)',
-    padding: 30,
-    borderRadius: 20,
-    alignItems: 'center',
-  },
-  savingText: {
-    marginTop: 15,
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: '#333',
   },
 });
