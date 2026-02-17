@@ -74,8 +74,6 @@ export const PathProvider = ({ children }) => {
             // ✅ Générer une miniature depuis Cloudinary
             let thumbnail = '';
             if (path.video_url) {
-              // Transformer l'URL Cloudinary pour obtenir une image miniature
-              // so_0 = première frame, w_400 = largeur 400px, h_300 = hauteur 300px
               thumbnail = path.video_url
                 .replace('/upload/', '/upload/so_0,w_400,h_300,c_fill/')
                 .replace('.mov', '.jpg')
@@ -88,11 +86,12 @@ export const PathProvider = ({ children }) => {
             
             return {
               id: path.id,
+              share_token: path.share_token || null, // ✅ AJOUTÉ
               title: path.title || 'Sans titre',
               departure: path.start_label || 'Départ',
               destination: path.end_label || 'Arrivée',
-              thumbnail: thumbnail,  // ✅ Miniature image générée
-              videoUri: path.video_url || '',  // URL vidéo complète
+              thumbnail: thumbnail,
+              videoUri: path.video_url || '',
               duration: path.duration ? `${path.duration} sec` : '0 sec',
               steps: path.steps || [],
               creator: path.user?.full_name || path.user?.email || 'Utilisateur',
@@ -102,8 +101,6 @@ export const PathProvider = ({ children }) => {
               views: 0,
               likes: 0,
               createdAt: path.created_at,
-              
-              // ✅ Coordonnées GPS (chargées depuis AsyncStorage ou générées)
               coordinates: coordinates,
               startLocation: coordinates.length > 0 ? coordinates[0] : null,
               endLocation: coordinates.length > 0 ? coordinates[coordinates.length - 1] : null,
@@ -147,7 +144,6 @@ export const PathProvider = ({ children }) => {
   };
 
   const addPath = async (pathData) => {
-    // Cette fonction n'est plus utilisée car on passe par PathConfirmationScreen
     console.warn('⚠️ addPath() est déprécié. Utilisez PathConfirmationScreen');
     return { success: false };
   };
@@ -158,9 +154,6 @@ export const PathProvider = ({ children }) => {
       
       // ✅ Supprimer aussi les coordonnées GPS locales
       await AsyncStorage.removeItem(`path_gps_${pathId}`);
-      
-      // TODO: Ajouter endpoint DELETE dans le backend si disponible
-      // await deletePathFromAPI(pathId);
       
       const updatedPaths = paths.filter(p => p.id !== pathId);
       setPaths(updatedPaths);
@@ -177,14 +170,6 @@ export const PathProvider = ({ children }) => {
   const toggleFavorite = async (pathId) => {
     try {
       console.log('❤️ Toggle favori pour:', pathId);
-      
-      // TODO: Connecter à l'API favoris
-      // const path = paths.find(p => p.id === pathId);
-      // if (path.isFavorite) {
-      //   await removeSavedPath(pathId);
-      // } else {
-      //   await savePathToFavorites(pathId);
-      // }
       
       const updatedPaths = paths.map(p =>
         p.id === pathId ? { ...p, isFavorite: !p.isFavorite } : p

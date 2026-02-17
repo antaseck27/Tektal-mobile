@@ -21,11 +21,9 @@ const { width, height } = Dimensions.get('window');
 
 export default function VideoPlayer({ route, navigation }) {
   const { path } = route.params;
-  
   const [showControls, setShowControls] = useState(true);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [mapRegion, setMapRegion] = useState(null);
-
   const mapRef = useRef(null);
 
   // ✅ Créer le player vidéo
@@ -41,27 +39,25 @@ export default function VideoPlayer({ route, navigation }) {
   };
 
   // ✅ UTILISER LES VRAIES COORDONNÉES GPS
-  const pathCoordinates = path.coordinates && path.coordinates.length > 0
-    ? path.coordinates
-    : [
-        // Coordonnées par défaut si pas de GPS
-        { latitude: 14.6937, longitude: -17.4441 },
-        { latitude: 14.6945, longitude: -17.4450 },
-        { latitude: 14.6950, longitude: -17.4465 },
-        { latitude: 14.6960, longitude: -17.4480 },
-        { latitude: 14.6970, longitude: -17.4490 },
-      ];
+  const pathCoordinates =
+    path.coordinates && path.coordinates.length > 0
+      ? path.coordinates
+      : [
+          { latitude: 14.6937, longitude: -17.4441 },
+          { latitude: 14.6945, longitude: -17.4450 },
+          { latitude: 14.6950, longitude: -17.4465 },
+          { latitude: 14.6960, longitude: -17.4480 },
+          { latitude: 14.6970, longitude: -17.4490 },
+        ];
 
   const startLocation = path.startLocation || pathCoordinates[0];
   const endLocation = path.endLocation || pathCoordinates[pathCoordinates.length - 1];
 
-  // ✅ Calculer le centre de la carte avec un zoom large (vue satellite générale)
   const initialRegion = {
     latitude: (startLocation.latitude + endLocation.latitude) / 2,
     longitude: (startLocation.longitude + endLocation.longitude) / 2,
-    // Delta plus grand pour voir toute la zone en vue satellite
-    latitudeDelta: 0.05, // Environ 5 km - vue satellite générale
-    longitudeDelta: 0.05, // Environ 5 km - vue satellite générale
+    latitudeDelta: 0.05,
+    longitudeDelta: 0.05,
   };
 
   // ✅ Play/Pause
@@ -77,39 +73,37 @@ export default function VideoPlayer({ route, navigation }) {
     }
   };
 
-  // ✅ Afficher/masquer contrôles
   const handleVideoPress = () => {
     setShowControls(!showControls);
   };
 
-  // ✅ Basculer plein écran
   const toggleFullscreen = () => {
     setIsFullscreen(!isFullscreen);
     setShowControls(true);
   };
 
-  // ✅ Recentrer la carte
   const recenterMap = () => {
     if (mapRef.current) {
       mapRef.current.animateToRegion(initialRegion, 500);
     }
   };
 
-  // ✅ Fonction de partage
+  // ✅ Fonction de partage — lien vers le site web Vercel
   const handleShare = async () => {
     try {
-      const shareUrl = `https://tektal-backend.onrender.com/api/share/${path.id}/`;
-      
+      if (!path.share_token) {
+        Alert.alert('Erreur', 'Token de partage manquant pour ce trajet.');
+        return;
+      }
+
+      // ✅ URL vers le site web Vercel (joli lien à partager)
+      const shareUrl = `https://tektal-web-appli.vercel.app/share/${path.share_token}`;
       await Clipboard.setStringAsync(shareUrl);
-      
       Alert.alert(
         '🔗 Lien copié !',
         `Le lien de partage a été copié :\n\n${shareUrl}\n\nVous pouvez maintenant le partager sur WhatsApp, SMS, email, etc.`,
-        [
-          { text: 'OK', style: 'default' }
-        ]
+        [{ text: 'OK', style: 'default' }]
       );
-      
     } catch (error) {
       console.error('Erreur partage:', error);
       Alert.alert('Erreur', 'Impossible de copier le lien de partage');
@@ -119,32 +113,25 @@ export default function VideoPlayer({ route, navigation }) {
   // ✅ Composant Vidéo réutilisable
   const VideoPlayerComponent = ({ fullscreen = false }) => (
     <TouchableOpacity
-      style={[
-        styles.videoContainer,
-        fullscreen && styles.videoContainerFullscreen,
-      ]}
       activeOpacity={1}
       onPress={handleVideoPress}
+      style={fullscreen ? styles.videoContainerFullscreen : styles.videoContainer}
     >
       <VideoView
         player={player}
-        style={styles.video}
+        style={fullscreen ? styles.videoContainerFullscreen : styles.video}
         contentFit="contain"
-        allowsFullscreen={false}
-        allowsPictureInPicture={false}
+        nativeControls={false}
       />
 
-      {/* Contrôles */}
       {showControls && (
         <>
+          <View style={styles.controlsOverlay} />
+
           <View style={styles.videoControls}>
-            <TouchableOpacity
-              style={styles.playPauseButton}
-              onPress={handlePlayPause}
-              activeOpacity={0.7}
-            >
+            <TouchableOpacity onPress={handlePlayPause} style={styles.playPauseButton}>
               <LinearGradient
-                colors={['#FFC837', '#FEBD00']}
+                colors={['#FEBD00', '#FF9500']}
                 style={styles.playPauseGradient}
               >
                 <Ionicons
@@ -156,28 +143,19 @@ export default function VideoPlayer({ route, navigation }) {
             </TouchableOpacity>
           </View>
 
-          {/* Bouton Plein écran */}
           {!fullscreen && (
-            <TouchableOpacity
-              style={styles.fullscreenButton}
-              onPress={toggleFullscreen}
-            >
+            <TouchableOpacity onPress={toggleFullscreen} style={styles.fullscreenButton}>
               <Ionicons name="expand" size={20} color="#fff" />
             </TouchableOpacity>
           )}
         </>
-      )}
-
-      {/* Overlay noir semi-transparent pour voir les contrôles */}
-      {showControls && (
-        <View style={styles.controlsOverlay} />
       )}
     </TouchableOpacity>
   );
 
   return (
     <View style={styles.container}>
-      <StatusBar barStyle="light-content" />
+      <StatusBar barStyle="light-content" backgroundColor="transparent" translucent />
 
       {/* Header */}
       <LinearGradient
@@ -185,34 +163,34 @@ export default function VideoPlayer({ route, navigation }) {
         style={styles.header}
       >
         <TouchableOpacity
-          style={styles.backButton}
           onPress={() => navigation.goBack()}
           activeOpacity={0.7}
+          style={styles.backButton}
         >
-          <Ionicons name="arrow-back" size={24} color="#fff" />
+          <Ionicons name="arrow-back" size={22} color="#fff" />
         </TouchableOpacity>
-        
+
         <View style={styles.headerInfo}>
           <Text style={styles.headerTitle} numberOfLines={1}>
             {path.title}
           </Text>
           <Text style={styles.headerSubtitle}>Par {path.creator}</Text>
         </View>
-        
+
         {/* ✅ BOUTON PARTAGER */}
-        <TouchableOpacity 
-          style={styles.shareButton} 
-          activeOpacity={0.7}
+        <TouchableOpacity
           onPress={handleShare}
+          activeOpacity={0.7}
+          style={styles.shareButton}
         >
-          <Ionicons name="share-outline" size={24} color="#fff" />
+          <Ionicons name="share-outline" size={22} color="#fff" />
         </TouchableOpacity>
       </LinearGradient>
 
       <ScrollView
         style={styles.content}
-        showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
       >
         {/* MAP SECTION */}
         <View style={styles.mapSection}>
@@ -220,75 +198,48 @@ export default function VideoPlayer({ route, navigation }) {
             <MapView
               ref={mapRef}
               style={styles.map}
+              mapType="satellite"
               initialRegion={initialRegion}
-              showsUserLocation={false}
-              showsMyLocationButton={false}
-              showsCompass={true}
-              showsScale={true}
-              showsTraffic={false}
-              showsBuildings={true}
-              showsIndoors={true}
-              loadingEnabled={true}
-              mapType="hybrid"  // Mode hybride pour voir les images satellite avec les noms
+              onRegionChangeComplete={setMapRegion}
               scrollEnabled={true}
-              zoomEnabled={true}  // L'utilisateur peut zoomer
+              zoomEnabled={true}
               pitchEnabled={true}
               rotateEnabled={true}
-              toolbarEnabled={true}
-              maxZoomLevel={22}  // Permet de zoomer jusqu'au niveau de la rue
-              minZoomLevel={10}
-              zoomControlEnabled={true}  // Active les contrôles de zoom natifs
-              zoomTapEnabled={true}  // Permet de zoomer en double-tapant
             >
-              {/* ✅ Ligne bleue pour l'itinéraire RÉEL */}
               <Polyline
                 coordinates={pathCoordinates}
                 strokeColor="#007AFF"
-                strokeWidth={5}
-                lineCap="round"
-                lineJoin="round"
+                strokeWidth={4}
+                lineDashPattern={[1]}
               />
 
-              {/* ✅ Marqueur de départ */}
-              <Marker
-                coordinate={startLocation}
-                title="Départ"
-                description={path.departure || path.title.split('→')[0]?.trim()}
-              >
+              <Marker coordinate={startLocation} anchor={{ x: 0.5, y: 0.5 }}>
                 <View style={styles.startMarker}>
-                  <Ionicons name="location" size={24} color="#fff" />
+                  <Ionicons name="flag" size={18} color="#fff" />
                 </View>
               </Marker>
 
-              {/* ✅ Marqueur d'arrivée */}
-              <Marker
-                coordinate={endLocation}
-                title="Arrivée"
-                description={path.destination || path.title.split('→')[1]?.trim()}
-              >
+              <Marker coordinate={endLocation} anchor={{ x: 0.5, y: 0.5 }}>
                 <View style={styles.endMarker}>
-                  <Ionicons name="flag" size={20} color="#fff" />
+                  <Ionicons name="location" size={18} color="#fff" />
                 </View>
               </Marker>
             </MapView>
 
-            {/* Badges overlay */}
             <View style={styles.mapOverlay}>
               <View style={styles.mapInfoBadge}>
                 <Ionicons name="time-outline" size={16} color="#FEBD00" />
                 <Text style={styles.mapInfoText}>{path.duration}</Text>
               </View>
-              
-              {/* Badge indication de zoom */}
+
               <View style={styles.zoomHintBadge}>
-                <Ionicons name="search" size={14} color="#fff" />
+                <Ionicons name="search-outline" size={12} color="#fff" />
                 <Text style={styles.zoomHintText}>Pincez pour zoomer</Text>
               </View>
-              
-              {/* Badge nombre de points GPS */}
+
               {path.coordinates && path.coordinates.length > 0 && (
                 <View style={styles.gpsBadge}>
-                  <Ionicons name="navigate" size={14} color="#34C759" />
+                  <Ionicons name="navigate" size={12} color="#fff" />
                   <Text style={styles.gpsBadgeText}>
                     {path.coordinates.length} points
                   </Text>
@@ -297,18 +248,14 @@ export default function VideoPlayer({ route, navigation }) {
 
               {path.isOfficial && (
                 <View style={styles.officialBadge}>
-                  <Ionicons name="shield-checkmark" size={14} color="#fff" />
+                  <Ionicons name="shield-checkmark" size={12} color="#fff" />
                   <Text style={styles.officialBadgeText}>Officiel</Text>
                 </View>
               )}
             </View>
 
-            {/* ✅ Bouton pour recentrer la carte */}
-            <TouchableOpacity
-              style={styles.recenterButton}
-              onPress={recenterMap}
-            >
-              <Ionicons name="locate" size={24} color="#007AFF" />
+            <TouchableOpacity onPress={recenterMap} style={styles.recenterButton}>
+              <Ionicons name="locate" size={22} color="#007AFF" />
             </TouchableOpacity>
           </View>
 
@@ -318,7 +265,7 @@ export default function VideoPlayer({ route, navigation }) {
               <View style={[styles.locationDot, { backgroundColor: '#34C759' }]} />
               <View style={styles.locationTextContainer}>
                 <Text style={styles.locationLabel}>Départ</Text>
-                <Text style={styles.locationText} numberOfLines={1}>
+                <Text style={styles.locationText}>
                   {path.departure || path.title.split('→')[0]?.trim()}
                 </Text>
                 <Text style={styles.coordsText}>
@@ -335,7 +282,7 @@ export default function VideoPlayer({ route, navigation }) {
               <View style={[styles.locationDot, { backgroundColor: '#FF3B30' }]} />
               <View style={styles.locationTextContainer}>
                 <Text style={styles.locationLabel}>Arrivée</Text>
-                <Text style={styles.locationText} numberOfLines={1}>
+                <Text style={styles.locationText}>
                   {path.destination || path.title.split('→')[1]?.trim()}
                 </Text>
                 <Text style={styles.coordsText}>
@@ -351,15 +298,14 @@ export default function VideoPlayer({ route, navigation }) {
           <View style={styles.videoHeader}>
             <Text style={styles.videoTitle}>Vidéo du trajet</Text>
           </View>
-
           <VideoPlayerComponent fullscreen={false} />
         </View>
 
-        {/* ✅ SECTION ÉTAPES/STEPS */}
+        {/* SECTION ÉTAPES */}
         {path.steps && path.steps.length > 0 && (
           <View style={styles.stepsSection}>
             <View style={styles.stepsSectionHeader}>
-              <Ionicons name="footsteps-outline" size={20} color="#FEBD00" />
+              <Ionicons name="list" size={22} color="#FEBD00" />
               <Text style={styles.stepsSectionTitle}>
                 Étapes du trajet ({path.steps.length})
               </Text>
@@ -375,7 +321,7 @@ export default function VideoPlayer({ route, navigation }) {
                   <View style={styles.stepHeader}>
                     <Text style={styles.stepTitle}>Étape {step.step_number}</Text>
                     <View style={styles.stepTiming}>
-                      <Ionicons name="time-outline" size={14} color="#666" />
+                      <Ionicons name="time-outline" size={12} color="#666" />
                       <Text style={styles.stepTimingText}>
                         {formatTime(step.start_time)} - {formatTime(step.end_time)}
                       </Text>
@@ -384,7 +330,6 @@ export default function VideoPlayer({ route, navigation }) {
 
                   <Text style={styles.stepText}>{step.text}</Text>
 
-                  {/* Bouton pour aller à cette étape dans la vidéo */}
                   <TouchableOpacity
                     style={styles.stepPlayButton}
                     onPress={() => {
@@ -401,11 +346,11 @@ export default function VideoPlayer({ route, navigation }) {
           </View>
         )}
 
-        {/* ✅ SECTION DESCRIPTION */}
+        {/* SECTION DESCRIPTION */}
         {path.description && (
           <View style={styles.descriptionSection}>
             <View style={styles.descriptionHeader}>
-              <Ionicons name="document-text-outline" size={20} color="#FEBD00" />
+              <Ionicons name="information-circle-outline" size={22} color="#FEBD00" />
               <Text style={styles.descriptionTitle}>Description du trajet</Text>
             </View>
             <Text style={styles.descriptionText}>{path.description}</Text>
@@ -428,7 +373,7 @@ export default function VideoPlayer({ route, navigation }) {
             </View>
 
             <View style={styles.infoCard}>
-              <Ionicons name="location-outline" size={24} color="#FEBD00" />
+              <Ionicons name="school-outline" size={24} color="#FEBD00" />
               <Text style={styles.infoCardValue}>{path.campus}</Text>
               <Text style={styles.infoCardLabel}>Campus</Text>
             </View>
@@ -442,22 +387,25 @@ export default function VideoPlayer({ route, navigation }) {
       <Modal
         visible={isFullscreen}
         animationType="fade"
+        statusBarTranslucent
         onRequestClose={toggleFullscreen}
-        supportedOrientations={['portrait', 'landscape']}
       >
         <View style={styles.fullscreenContainer}>
           <StatusBar hidden />
 
-          {/* Header plein écran */}
-          <View style={styles.fullscreenHeader}>
-            <TouchableOpacity
-              style={styles.fullscreenCloseButton}
-              onPress={toggleFullscreen}
-            >
-              <Ionicons name="close" size={28} color="#fff" />
-            </TouchableOpacity>
-            <Text style={styles.fullscreenTitle}>{path.title}</Text>
-          </View>
+          {showControls && (
+            <View style={styles.fullscreenHeader}>
+              <TouchableOpacity
+                onPress={toggleFullscreen}
+                style={styles.fullscreenCloseButton}
+              >
+                <Ionicons name="close" size={24} color="#fff" />
+              </TouchableOpacity>
+              <Text style={styles.fullscreenTitle} numberOfLines={1}>
+                {path.title}
+              </Text>
+            </View>
+          )}
 
           <VideoPlayerComponent fullscreen={true} />
         </View>
@@ -519,8 +467,6 @@ const styles = StyleSheet.create({
   scrollContent: {
     paddingTop: 100,
   },
-
-  // MAP SECTION
   mapSection: {
     backgroundColor: '#fff',
     borderRadius: 0,
@@ -699,8 +645,6 @@ const styles = StyleSheet.create({
     borderLeftColor: '#ccc',
     borderStyle: 'dotted',
   },
-
-  // VIDEO SECTION
   videoSection: {
     backgroundColor: '#fff',
     marginTop: 16,
@@ -777,8 +721,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
-
-  // ✅ STEPS SECTION
   stepsSection: {
     backgroundColor: '#fff',
     marginTop: 16,
@@ -868,8 +810,6 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: '#FEBD00',
   },
-
-  // DESCRIPTION SECTION
   descriptionSection: {
     backgroundColor: '#fff',
     marginTop: 16,
@@ -898,8 +838,6 @@ const styles = StyleSheet.create({
     lineHeight: 22,
     color: '#666',
   },
-
-  // FULLSCREEN
   fullscreenContainer: {
     flex: 1,
     backgroundColor: '#000',
@@ -933,8 +871,6 @@ const styles = StyleSheet.create({
     color: '#fff',
     marginLeft: 16,
   },
-
-  // Info Section
   infoSection: {
     marginTop: 16,
     marginHorizontal: 20,
