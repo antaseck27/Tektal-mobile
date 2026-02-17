@@ -1,4 +1,4 @@
-// screens/TableauDeBord/VideoPlayer.js
+// screens/TableauDeBord/VideoPlayerScreen.js
 import React, { useState, useRef } from 'react';
 import {
   View,
@@ -9,11 +9,13 @@ import {
   Dimensions,
   ScrollView,
   Modal,
+  Alert,
 } from 'react-native';
 import { useVideoPlayer, VideoView } from 'expo-video';
 import MapView, { Polyline, Marker } from 'react-native-maps';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
+import * as Clipboard from 'expo-clipboard';
 
 const { width, height } = Dimensions.get('window');
 
@@ -22,6 +24,7 @@ export default function VideoPlayer({ route, navigation }) {
   
   const [showControls, setShowControls] = useState(true);
   const [isFullscreen, setIsFullscreen] = useState(false);
+  const [mapRegion, setMapRegion] = useState(null);
 
   const mapRef = useRef(null);
 
@@ -29,6 +32,13 @@ export default function VideoPlayer({ route, navigation }) {
   const player = useVideoPlayer(path.videoUri, (player) => {
     player.loop = false;
   });
+
+  // ✅ Fonction formatTime
+  const formatTime = (seconds) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = Math.floor(seconds % 60);
+    return `${mins}:${secs.toString().padStart(2, '0')}`;
+  };
 
   // ✅ UTILISER LES VRAIES COORDONNÉES GPS
   const pathCoordinates = path.coordinates && path.coordinates.length > 0
@@ -45,12 +55,13 @@ export default function VideoPlayer({ route, navigation }) {
   const startLocation = path.startLocation || pathCoordinates[0];
   const endLocation = path.endLocation || pathCoordinates[pathCoordinates.length - 1];
 
-  // ✅ Calculer le centre de la carte
-  const mapRegion = {
+  // ✅ Calculer le centre de la carte avec un zoom large (vue satellite générale)
+  const initialRegion = {
     latitude: (startLocation.latitude + endLocation.latitude) / 2,
     longitude: (startLocation.longitude + endLocation.longitude) / 2,
-    latitudeDelta: Math.abs(startLocation.latitude - endLocation.latitude) * 2 || 0.01,
-    longitudeDelta: Math.abs(startLocation.longitude - endLocation.longitude) * 2 || 0.01,
+    // Delta plus grand pour voir toute la zone en vue satellite
+    latitudeDelta: 0.05, // Environ 5 km - vue satellite générale
+    longitudeDelta: 0.05, // Environ 5 km - vue satellite générale
   };
 
   // ✅ Play/Pause
@@ -80,7 +91,28 @@ export default function VideoPlayer({ route, navigation }) {
   // ✅ Recentrer la carte
   const recenterMap = () => {
     if (mapRef.current) {
-      mapRef.current.animateToRegion(mapRegion, 500);
+      mapRef.current.animateToRegion(initialRegion, 500);
+    }
+  };
+
+  // ✅ Fonction de partage
+  const handleShare = async () => {
+    try {
+      const shareUrl = `https://tektal-backend.onrender.com/api/share/${path.id}/`;
+      
+      await Clipboard.setStringAsync(shareUrl);
+      
+      Alert.alert(
+        '🔗 Lien copié !',
+        `Le lien de partage a été copié :\n\n${shareUrl}\n\nVous pouvez maintenant le partager sur WhatsApp, SMS, email, etc.`,
+        [
+          { text: 'OK', style: 'default' }
+        ]
+      );
+      
+    } catch (error) {
+      console.error('Erreur partage:', error);
+      Alert.alert('Erreur', 'Impossible de copier le lien de partage');
     }
   };
 
@@ -159,14 +191,21 @@ export default function VideoPlayer({ route, navigation }) {
         >
           <Ionicons name="arrow-back" size={24} color="#fff" />
         </TouchableOpacity>
+        
         <View style={styles.headerInfo}>
           <Text style={styles.headerTitle} numberOfLines={1}>
             {path.title}
           </Text>
           <Text style={styles.headerSubtitle}>Par {path.creator}</Text>
         </View>
-        <TouchableOpacity style={styles.moreButton} activeOpacity={0.7}>
-          <Ionicons name="ellipsis-vertical" size={24} color="#fff" />
+        
+        {/* ✅ BOUTON PARTAGER */}
+        <TouchableOpacity 
+          style={styles.shareButton} 
+          activeOpacity={0.7}
+          onPress={handleShare}
+        >
+          <Ionicons name="share-outline" size={24} color="#fff" />
         </TouchableOpacity>
       </LinearGradient>
 
@@ -181,7 +220,7 @@ export default function VideoPlayer({ route, navigation }) {
             <MapView
               ref={mapRef}
               style={styles.map}
-              initialRegion={mapRegion}
+              initialRegion={initialRegion}
               showsUserLocation={false}
               showsMyLocationButton={false}
               showsCompass={true}
@@ -190,12 +229,16 @@ export default function VideoPlayer({ route, navigation }) {
               showsBuildings={true}
               showsIndoors={true}
               loadingEnabled={true}
-              mapType="standard"
+              mapType="hybrid"  // Mode hybride pour voir les images satellite avec les noms
               scrollEnabled={true}
-              zoomEnabled={true}
+              zoomEnabled={true}  // L'utilisateur peut zoomer
               pitchEnabled={true}
               rotateEnabled={true}
               toolbarEnabled={true}
+              maxZoomLevel={22}  // Permet de zoomer jusqu'au niveau de la rue
+              minZoomLevel={10}
+              zoomControlEnabled={true}  // Active les contrôles de zoom natifs
+              zoomTapEnabled={true}  // Permet de zoomer en double-tapant
             >
               {/* ✅ Ligne bleue pour l'itinéraire RÉEL */}
               <Polyline
@@ -236,6 +279,12 @@ export default function VideoPlayer({ route, navigation }) {
                 <Text style={styles.mapInfoText}>{path.duration}</Text>
               </View>
               
+              {/* Badge indication de zoom */}
+              <View style={styles.zoomHintBadge}>
+                <Ionicons name="search" size={14} color="#fff" />
+                <Text style={styles.zoomHintText}>Pincez pour zoomer</Text>
+              </View>
+              
               {/* Badge nombre de points GPS */}
               {path.coordinates && path.coordinates.length > 0 && (
                 <View style={styles.gpsBadge}>
@@ -273,7 +322,7 @@ export default function VideoPlayer({ route, navigation }) {
                   {path.departure || path.title.split('→')[0]?.trim()}
                 </Text>
                 <Text style={styles.coordsText}>
-                  {startLocation.latitude.toFixed(4)}, {startLocation.longitude.toFixed(4)}
+                  {startLocation.latitude.toFixed(6)}, {startLocation.longitude.toFixed(6)}
                 </Text>
               </View>
             </View>
@@ -290,7 +339,7 @@ export default function VideoPlayer({ route, navigation }) {
                   {path.destination || path.title.split('→')[1]?.trim()}
                 </Text>
                 <Text style={styles.coordsText}>
-                  {endLocation.latitude.toFixed(4)}, {endLocation.longitude.toFixed(4)}
+                  {endLocation.latitude.toFixed(6)}, {endLocation.longitude.toFixed(6)}
                 </Text>
               </View>
             </View>
@@ -305,6 +354,52 @@ export default function VideoPlayer({ route, navigation }) {
 
           <VideoPlayerComponent fullscreen={false} />
         </View>
+
+        {/* ✅ SECTION ÉTAPES/STEPS */}
+        {path.steps && path.steps.length > 0 && (
+          <View style={styles.stepsSection}>
+            <View style={styles.stepsSectionHeader}>
+              <Ionicons name="footsteps-outline" size={20} color="#FEBD00" />
+              <Text style={styles.stepsSectionTitle}>
+                Étapes du trajet ({path.steps.length})
+              </Text>
+            </View>
+
+            {path.steps.map((step, index) => (
+              <View key={index} style={styles.stepCard}>
+                <View style={styles.stepNumber}>
+                  <Text style={styles.stepNumberText}>{step.step_number}</Text>
+                </View>
+
+                <View style={styles.stepContent}>
+                  <View style={styles.stepHeader}>
+                    <Text style={styles.stepTitle}>Étape {step.step_number}</Text>
+                    <View style={styles.stepTiming}>
+                      <Ionicons name="time-outline" size={14} color="#666" />
+                      <Text style={styles.stepTimingText}>
+                        {formatTime(step.start_time)} - {formatTime(step.end_time)}
+                      </Text>
+                    </View>
+                  </View>
+
+                  <Text style={styles.stepText}>{step.text}</Text>
+
+                  {/* Bouton pour aller à cette étape dans la vidéo */}
+                  <TouchableOpacity
+                    style={styles.stepPlayButton}
+                    onPress={() => {
+                      player.currentTime = step.start_time;
+                      player.play();
+                    }}
+                  >
+                    <Ionicons name="play-circle" size={16} color="#FEBD00" />
+                    <Text style={styles.stepPlayText}>Voir cette étape</Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
+            ))}
+          </View>
+        )}
 
         {/* ✅ SECTION DESCRIPTION */}
         {path.description && (
@@ -410,7 +505,7 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: 'rgba(255,255,255,0.8)',
   },
-  moreButton: {
+  shareButton: {
     width: 40,
     height: 40,
     borderRadius: 20,
@@ -468,6 +563,20 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: '600',
     color: '#333',
+  },
+  zoomHintBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0,0,0,0.7)',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 20,
+    gap: 4,
+  },
+  zoomHintText: {
+    fontSize: 12,
+    fontWeight: '500',
+    color: '#fff',
   },
   gpsBadge: {
     flexDirection: 'row',
@@ -669,7 +778,98 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
 
-  // ✅ DESCRIPTION SECTION
+  // ✅ STEPS SECTION
+  stepsSection: {
+    backgroundColor: '#fff',
+    marginTop: 16,
+    marginHorizontal: 20,
+    borderRadius: 16,
+    padding: 16,
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
+  },
+  stepsSectionHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 16,
+    gap: 8,
+  },
+  stepsSectionTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#1a1a1a',
+  },
+  stepCard: {
+    flexDirection: 'row',
+    backgroundColor: '#F8F9FA',
+    borderRadius: 12,
+    padding: 12,
+    marginBottom: 12,
+    borderLeftWidth: 4,
+    borderLeftColor: '#FEBD00',
+  },
+  stepNumber: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: '#FEBD00',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 12,
+  },
+  stepNumberText: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#fff',
+  },
+  stepContent: {
+    flex: 1,
+  },
+  stepHeader: {
+    marginBottom: 8,
+  },
+  stepTitle: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#1a1a1a',
+    marginBottom: 4,
+  },
+  stepTiming: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+  },
+  stepTimingText: {
+    fontSize: 12,
+    color: '#666',
+    fontWeight: '500',
+  },
+  stepText: {
+    fontSize: 14,
+    color: '#333',
+    lineHeight: 20,
+    marginBottom: 8,
+  },
+  stepPlayButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    alignSelf: 'flex-start',
+    backgroundColor: '#FFF8E1',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 16,
+    gap: 4,
+  },
+  stepPlayText: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: '#FEBD00',
+  },
+
+  // DESCRIPTION SECTION
   descriptionSection: {
     backgroundColor: '#fff',
     marginTop: 16,

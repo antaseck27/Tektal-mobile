@@ -662,9 +662,7 @@ export default function Accueil({ navigation }) {
                   <Ionicons name={path.isFavorite ? 'heart' : 'heart-outline'} size={24} color={path.isFavorite ? '#FF3B30' : '#ccc'} />
                 </TouchableOpacity>
 
-                <TouchableOpacity style={styles.deleteButton} onPress={() => handleDeletePath(path)} activeOpacity={0.6}>
-                  <Ionicons name="trash-outline" size={22} color="#FF3B30" />
-                </TouchableOpacity>
+                
               </View>
             </TouchableOpacity>
           ))}
