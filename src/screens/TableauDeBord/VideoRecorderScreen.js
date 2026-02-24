@@ -306,6 +306,7 @@ export default function VideoRecorderScreen({ route, navigation }) {
                 ]}
                 onPress={isRecording ? stopRecording : startRecording}
                 disabled={!currentLocation}
+                
               >
                 <View style={[
                   styles.recordButtonInner,
