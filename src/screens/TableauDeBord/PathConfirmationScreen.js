@@ -1,3 +1,4 @@
+
 // // screens/TableauDeBord/PathConfirmationScreen.js
 // import React, { useState } from 'react';
 // import {
@@ -12,7 +13,7 @@
 // import { useVideoPlayer, VideoView } from 'expo-video';
 // import { Ionicons } from '@expo/vector-icons';
 // import { LinearGradient } from 'expo-linear-gradient';
-// import { createPath, uploadToCloudinary } from '../../services/authService';
+// import { uploadToCloudinary, createPath } from '../../services/authService';
 // import { usePaths } from '../../context/PathContext';
 // import AsyncStorage from '@react-native-async-storage/async-storage';
 
@@ -32,7 +33,7 @@
 
 //   const [isSubmitting, setIsSubmitting] = useState(false);
 //   const [uploadProgress, setUploadProgress] = useState(0);
-//   const [uploadStage, setUploadStage] = useState(''); // 'upload', 'saving'
+//   const [uploadStage, setUploadStage] = useState('');
 
 //   const player = useVideoPlayer(videoUri, (player) => {
 //     player.loop = true;
@@ -46,9 +47,9 @@
 
 //     try {
 //       Alert.alert('📤 Upload', 'Envoi de la vidéo en cours...');
-      
+
 //       const uploadResult = await uploadToCloudinary(videoUri);
-      
+
 //       setUploadProgress(50);
 
 //       if (!uploadResult.ok) {
@@ -57,23 +58,29 @@
 
 //       setUploadStage('saving');
 
-//       // ✅ Nettoyer les données avant envoi
-//       const cleanedSteps = steps.map(step => ({
-//         step_number: parseInt(step.step_number) || 1,
+//       const cleanedSteps = steps.map((step) => ({
+//         step_number: parseInt(step.step_number, 10) || 1,
 //         start_time: parseFloat(step.start_time) || 0,
 //         end_time: parseFloat(step.end_time) || 10,
 //         text: (step.text || '').replace(/\n/g, ' ').trim(),
 //       }));
 
-//       // ✅ Formater les coordonnées en STRING pour Django
 //       const pathData = {
 //         title: `${departure} → ${destination}`,
 //         start_label: departure || '',
 //         end_label: destination || '',
-//         start_lat: startLocation?.latitude ? startLocation.latitude.toFixed(6).toString() : null,
-//         start_lng: startLocation?.longitude ? startLocation.longitude.toFixed(6).toString() : null,
-//         end_lat: endLocation?.latitude ? endLocation.latitude.toFixed(6).toString() : null,
-//         end_lng: endLocation?.longitude ? endLocation.longitude.toFixed(6).toString() : null,
+//         start_lat: startLocation?.latitude
+//           ? startLocation.latitude.toFixed(6).toString()
+//           : null,
+//         start_lng: startLocation?.longitude
+//           ? startLocation.longitude.toFixed(6).toString()
+//           : null,
+//         end_lat: endLocation?.latitude
+//           ? endLocation.latitude.toFixed(6).toString()
+//           : null,
+//         end_lng: endLocation?.longitude
+//           ? endLocation.longitude.toFixed(6).toString()
+//           : null,
 //         video_url: uploadResult.data.secure_url,
 //         duration: Math.round(videoDuration) || 0,
 //         is_official: pathType === 'official',
@@ -89,23 +96,21 @@
 //       setUploadProgress(100);
 
 //       if (result.ok) {
-//         console.log('✅ Chemin créé avec ID:', result.data.id);
-        
-//         // ✅ Sauvegarder les coordonnées GPS localement
+//         console.log('✅ Chemin créé avec ID:', result.data?.id);
+
 //         const gpsCoordinates = route.params.coordinates || [];
-        
-//         if (gpsCoordinates.length > 0) {
+
+//         if (gpsCoordinates.length > 0 && result.data?.id) {
 //           await AsyncStorage.setItem(
-//             `path_gps_${result.data.id}`, 
+//             `path_gps_${result.data.id}`,
 //             JSON.stringify(gpsCoordinates)
 //           );
 //           console.log(`📍 ${gpsCoordinates.length} points GPS sauvegardés localement`);
 //         }
-        
-//         // Rafraîchir la liste des chemins
+
 //         console.log('✅ Rafraîchissement de la liste...');
 //         await refreshPaths();
-        
+
 //         Alert.alert(
 //           '🎉 Chemin publié !',
 //           `Votre chemin "${departure} → ${destination}" a été publié avec succès.`,
@@ -129,41 +134,58 @@
 //           ]
 //         );
 //       } else {
-//         console.error('❌ Erreurs Django:', result.data);
-        
+//         const backendPayload = result.data ?? result.error;
+
+//         console.log('❌ Erreur lors de la création du chemin:', result.data);
+//         console.error('❌ Erreurs Django:', backendPayload);
+//         console.log('❌ status:', result.status);
+//         console.log('❌ backend:', JSON.stringify(backendPayload, null, 2));
+
 //         let errorMessage = 'Une erreur est survenue lors de la publication.';
-        
+
 //         if (result.status === 500) {
-//           errorMessage = 'Erreur serveur (500). Veuillez réessayer plus tard ou contacter l\'administrateur.';
-//         } else if (result.data) {
-//           if (typeof result.data === 'object') {
-//             const errorDetails = Object.entries(result.data)
+//           if (backendPayload) {
+//             if (typeof backendPayload === 'object') {
+//               errorMessage = Object.entries(backendPayload)
+//                 .map(([field, messages]) => {
+//                   const msg = Array.isArray(messages) ? messages.join(', ') : String(messages);
+//                   return `${field}: ${msg}`;
+//                 })
+//                 .join('\n');
+//             } else {
+//               errorMessage = String(backendPayload);
+//             }
+//           } else {
+//             errorMessage =
+//               "Erreur serveur (500). Veuillez réessayer plus tard ou contacter l'administrateur.";
+//           }
+//         } else if (backendPayload) {
+//           if (typeof backendPayload === 'object') {
+//             const errorDetails = Object.entries(backendPayload)
 //               .map(([field, messages]) => {
-//                 const msg = Array.isArray(messages) ? messages.join(', ') : messages;
+//                 const msg = Array.isArray(messages) ? messages.join(', ') : String(messages);
 //                 return `${field}: ${msg}`;
 //               })
 //               .join('\n');
-            
-//             errorMessage = errorDetails || JSON.stringify(result.data);
+
+//             errorMessage = errorDetails || JSON.stringify(backendPayload);
 //           } else {
-//             errorMessage = result.data.toString();
+//             errorMessage = String(backendPayload);
 //           }
-//         } else if (result.error) {
-//           errorMessage = result.error;
 //         }
 
 //         Alert.alert('❌ Erreur', errorMessage);
 //       }
 //     } catch (error) {
 //       console.error('❌ Erreur soumission:', error);
-      
+
 //       let userMessage = error.message;
 //       if (error.message.includes('network') || error.message.includes('Network')) {
 //         userMessage = 'Problème de connexion internet. Vérifiez votre réseau.';
 //       } else if (error.message.includes('timeout')) {
 //         userMessage = 'Le téléchargement a pris trop de temps.';
 //       }
-      
+
 //       Alert.alert('❌ Erreur', userMessage);
 //     } finally {
 //       setIsSubmitting(false);
@@ -186,7 +208,6 @@
 
 //   return (
 //     <View style={styles.container}>
-//       {/* Header */}
 //       <LinearGradient colors={['#FEBD00', '#FFD700']} style={styles.header}>
 //         <TouchableOpacity
 //           style={styles.backButton}
@@ -211,7 +232,6 @@
 //       </LinearGradient>
 
 //       <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
-//         {/* Vidéo */}
 //         <View style={styles.videoSection}>
 //           <Text style={styles.sectionTitle}>Aperçu de la vidéo</Text>
 //           <View style={styles.videoContainer}>
@@ -224,7 +244,6 @@
 //           </View>
 //         </View>
 
-//         {/* Informations du chemin */}
 //         <View style={styles.infoSection}>
 //           <Text style={styles.sectionTitle}>Informations du chemin</Text>
 
@@ -282,8 +301,7 @@
 //                 </Text>
 //               </View>
 //             </View>
-            
-//             {/* ✅ Afficher le nombre de points GPS */}
+
 //             {route.params.coordinates && route.params.coordinates.length > 0 && (
 //               <>
 //                 <View style={styles.divider} />
@@ -301,11 +319,8 @@
 //           </View>
 //         </View>
 
-//         {/* Étapes */}
 //         <View style={styles.stepsSection}>
-//           <Text style={styles.sectionTitle}>
-//             Étapes du trajet ({steps.length})
-//           </Text>
+//           <Text style={styles.sectionTitle}>Étapes du trajet ({steps.length})</Text>
 
 //           {steps.map((step, index) => (
 //             <View key={index} style={styles.stepCard}>
@@ -328,7 +343,6 @@
 //           ))}
 //         </View>
 
-//         {/* Avertissement */}
 //         <View style={styles.warningCard}>
 //           <Ionicons name="information-circle" size={24} color="#FF9500" />
 //           <View style={styles.warningTextContainer}>
@@ -346,7 +360,6 @@
 //         <View style={styles.bottomSpacing} />
 //       </ScrollView>
 
-//       {/* Footer avec boutons */}
 //       <View style={styles.footer}>
 //         {isSubmitting && (
 //           <View style={styles.progressContainer}>
@@ -390,7 +403,6 @@
 //         </View>
 //       </View>
 
-//       {/* Overlay de chargement */}
 //       {isSubmitting && (
 //         <View style={styles.loadingOverlay}>
 //           <View style={styles.loadingBox}>
@@ -407,266 +419,58 @@
 // }
 
 // const styles = StyleSheet.create({
-//   container: {
-//     flex: 1,
-//     backgroundColor: '#f5f5f5',
-//   },
-//   header: {
-//     flexDirection: 'row',
-//     alignItems: 'center',
-//     paddingTop: 60,
-//     paddingBottom: 20,
-//     paddingHorizontal: 20,
-//   },
-//   backButton: {
-//     width: 40,
-//     height: 40,
-//     borderRadius: 20,
-//     backgroundColor: 'rgba(255,255,255,0.3)',
-//     justifyContent: 'center',
-//     alignItems: 'center',
-//   },
-//   headerInfo: {
-//     flex: 1,
-//     marginLeft: 15,
-//   },
-//   headerTitle: {
-//     fontSize: 18,
-//     fontWeight: 'bold',
-//     color: '#333',
-//   },
-//   headerSubtitle: {
-//     fontSize: 14,
-//     color: '#666',
-//     marginTop: 2,
-//   },
-//   headerBadge: {
-//     width: 40,
-//     height: 40,
-//     borderRadius: 20,
-//     backgroundColor: 'rgba(255,255,255,0.3)',
-//     justifyContent: 'center',
-//     alignItems: 'center',
-//   },
-//   content: {
-//     flex: 1,
-//     paddingHorizontal: 20,
-//   },
-//   sectionTitle: {
-//     fontSize: 18,
-//     fontWeight: 'bold',
-//     color: '#333',
-//     marginBottom: 12,
-//     marginTop: 20,
-//   },
+//   container: { flex: 1, backgroundColor: '#f5f5f5' },
+//   header: { flexDirection: 'row', alignItems: 'center', paddingTop: 60, paddingBottom: 20, paddingHorizontal: 20 },
+//   backButton: { width: 40, height: 40, borderRadius: 20, backgroundColor: 'rgba(255,255,255,0.3)', justifyContent: 'center', alignItems: 'center' },
+//   headerInfo: { flex: 1, marginLeft: 15 },
+//   headerTitle: { fontSize: 18, fontWeight: 'bold', color: '#333' },
+//   headerSubtitle: { fontSize: 14, color: '#666', marginTop: 2 },
+//   headerBadge: { width: 40, height: 40, borderRadius: 20, backgroundColor: 'rgba(255,255,255,0.3)', justifyContent: 'center', alignItems: 'center' },
+//   content: { flex: 1, paddingHorizontal: 20 },
+//   sectionTitle: { fontSize: 18, fontWeight: 'bold', color: '#333', marginBottom: 12, marginTop: 20 },
 //   videoSection: {},
-//   videoContainer: {
-//     height: 200,
-//     backgroundColor: '#000',
-//     borderRadius: 16,
-//     overflow: 'hidden',
-//   },
-//   video: {
-//     width: '100%',
-//     height: '100%',
-//   },
+//   videoContainer: { height: 200, backgroundColor: '#000', borderRadius: 16, overflow: 'hidden' },
+//   video: { width: '100%', height: '100%' },
 //   infoSection: {},
-//   infoCard: {
-//     backgroundColor: '#fff',
-//     borderRadius: 16,
-//     padding: 16,
-//   },
-//   infoRow: {
-//     flexDirection: 'row',
-//     alignItems: 'center',
-//     paddingVertical: 8,
-//   },
-//   infoTextContainer: {
-//     flex: 1,
-//     marginLeft: 12,
-//   },
-//   infoLabel: {
-//     fontSize: 12,
-//     color: '#999',
-//     marginBottom: 2,
-//   },
-//   infoValue: {
-//     fontSize: 16,
-//     fontWeight: '600',
-//     color: '#333',
-//   },
-//   coordsText: {
-//     fontSize: 11,
-//     color: '#666',
-//     marginTop: 2,
-//     fontFamily: 'monospace',
-//   },
-//   divider: {
-//     height: 1,
-//     backgroundColor: '#f0f0f0',
-//     marginVertical: 8,
-//   },
+//   infoCard: { backgroundColor: '#fff', borderRadius: 16, padding: 16 },
+//   infoRow: { flexDirection: 'row', alignItems: 'center', paddingVertical: 8 },
+//   infoTextContainer: { flex: 1, marginLeft: 12 },
+//   infoLabel: { fontSize: 12, color: '#999', marginBottom: 2 },
+//   infoValue: { fontSize: 16, fontWeight: '600', color: '#333' },
+//   coordsText: { fontSize: 11, color: '#666', marginTop: 2, fontFamily: 'monospace' },
+//   divider: { height: 1, backgroundColor: '#f0f0f0', marginVertical: 8 },
 //   stepsSection: {},
-//   stepCard: {
-//     backgroundColor: '#fff',
-//     borderRadius: 12,
-//     padding: 16,
-//     marginBottom: 12,
-//     borderLeftWidth: 4,
-//     borderLeftColor: '#FEBD00',
-//   },
-//   stepHeader: {
-//     flexDirection: 'row',
-//     alignItems: 'center',
-//     marginBottom: 8,
-//   },
-//   stepNumberBadge: {
-//     width: 28,
-//     height: 28,
-//     borderRadius: 14,
-//     backgroundColor: '#FEBD00',
-//     justifyContent: 'center',
-//     alignItems: 'center',
-//     marginRight: 10,
-//   },
-//   stepNumberText: {
-//     fontSize: 14,
-//     fontWeight: 'bold',
-//     color: '#fff',
-//   },
-//   stepTitle: {
-//     fontSize: 16,
-//     fontWeight: 'bold',
-//     color: '#333',
-//   },
-//   stepTiming: {
-//     flexDirection: 'row',
-//     alignItems: 'center',
-//     marginBottom: 8,
-//     gap: 6,
-//   },
-//   stepTimingText: {
-//     fontSize: 13,
-//     color: '#666',
-//     fontWeight: '500',
-//   },
-//   stepText: {
-//     fontSize: 14,
-//     color: '#333',
-//     lineHeight: 20,
-//   },
-//   warningCard: {
-//     flexDirection: 'row',
-//     backgroundColor: '#FFF4E6',
-//     borderRadius: 12,
-//     padding: 16,
-//     marginTop: 20,
-//     borderWidth: 1,
-//     borderColor: '#FFE0B2',
-//   },
-//   warningTextContainer: {
-//     flex: 1,
-//     marginLeft: 12,
-//   },
-//   warningTitle: {
-//     fontSize: 14,
-//     fontWeight: 'bold',
-//     color: '#FF9500',
-//     marginBottom: 4,
-//   },
-//   warningText: {
-//     fontSize: 13,
-//     color: '#666',
-//     lineHeight: 18,
-//   },
-//   footer: {
-//     backgroundColor: '#fff',
-//     borderTopWidth: 1,
-//     borderTopColor: '#e0e0e0',
-//     paddingHorizontal: 20,
-//     paddingVertical: 16,
-//   },
-//   progressContainer: {
-//     marginBottom: 12,
-//   },
-//   progressBarContainer: {
-//     height: 4,
-//     backgroundColor: '#e0e0e0',
-//     borderRadius: 2,
-//     marginBottom: 8,
-//     overflow: 'hidden',
-//   },
-//   progressBar: {
-//     height: '100%',
-//     backgroundColor: '#FEBD00',
-//   },
-//   progressText: {
-//     fontSize: 12,
-//     color: '#666',
-//     textAlign: 'center',
-//   },
-//   footerButtons: {
-//     flexDirection: 'row',
-//     gap: 12,
-//   },
-//   footerButton: {
-//     flex: 1,
-//     borderRadius: 25,
-//     overflow: 'hidden',
-//   },
-//   cancelButton: {
-//     backgroundColor: '#f0f0f0',
-//     justifyContent: 'center',
-//     alignItems: 'center',
-//     paddingVertical: 16,
-//   },
-//   cancelButtonText: {
-//     fontSize: 16,
-//     fontWeight: 'bold',
-//     color: '#666',
-//   },
+//   stepCard: { backgroundColor: '#fff', borderRadius: 12, padding: 16, marginBottom: 12, borderLeftWidth: 4, borderLeftColor: '#FEBD00' },
+//   stepHeader: { flexDirection: 'row', alignItems: 'center', marginBottom: 8 },
+//   stepNumberBadge: { width: 28, height: 28, borderRadius: 14, backgroundColor: '#FEBD00', justifyContent: 'center', alignItems: 'center', marginRight: 10 },
+//   stepNumberText: { fontSize: 14, fontWeight: 'bold', color: '#fff' },
+//   stepTitle: { fontSize: 16, fontWeight: 'bold', color: '#333' },
+//   stepTiming: { flexDirection: 'row', alignItems: 'center', marginBottom: 8, gap: 6 },
+//   stepTimingText: { fontSize: 13, color: '#666', fontWeight: '500' },
+//   stepText: { fontSize: 14, color: '#333', lineHeight: 20 },
+//   warningCard: { flexDirection: 'row', backgroundColor: '#FFF4E6', borderRadius: 12, padding: 16, marginTop: 20, borderWidth: 1, borderColor: '#FFE0B2' },
+//   warningTextContainer: { flex: 1, marginLeft: 12 },
+//   warningTitle: { fontSize: 14, fontWeight: 'bold', color: '#FF9500', marginBottom: 4 },
+//   warningText: { fontSize: 13, color: '#666', lineHeight: 18 },
+//   footer: { backgroundColor: '#fff', borderTopWidth: 1, borderTopColor: '#e0e0e0', paddingHorizontal: 20, paddingVertical: 16 },
+//   progressContainer: { marginBottom: 12 },
+//   progressBarContainer: { height: 4, backgroundColor: '#e0e0e0', borderRadius: 2, marginBottom: 8, overflow: 'hidden' },
+//   progressBar: { height: '100%', backgroundColor: '#FEBD00' },
+//   progressText: { fontSize: 12, color: '#666', textAlign: 'center' },
+//   footerButtons: { flexDirection: 'row', gap: 12 },
+//   footerButton: { flex: 1, borderRadius: 25, overflow: 'hidden' },
+//   cancelButton: { backgroundColor: '#f0f0f0', justifyContent: 'center', alignItems: 'center', paddingVertical: 16 },
+//   cancelButtonText: { fontSize: 16, fontWeight: 'bold', color: '#666' },
 //   publishButton: {},
-//   publishGradient: {
-//     flexDirection: 'row',
-//     alignItems: 'center',
-//     justifyContent: 'center',
-//     paddingVertical: 16,
-//     gap: 8,
-//   },
-//   publishButtonText: {
-//     fontSize: 16,
-//     fontWeight: 'bold',
-//     color: '#fff',
-//   },
-//   loadingOverlay: {
-//     ...StyleSheet.absoluteFillObject,
-//     backgroundColor: 'rgba(0,0,0,0.7)',
-//     justifyContent: 'center',
-//     alignItems: 'center',
-//     zIndex: 999,
-//   },
-//   loadingBox: {
-//     backgroundColor: '#fff',
-//     borderRadius: 20,
-//     padding: 30,
-//     alignItems: 'center',
-//     minWidth: 200,
-//   },
-//   loadingText: {
-//     fontSize: 16,
-//     fontWeight: 'bold',
-//     color: '#333',
-//     marginTop: 16,
-//   },
-//   loadingSubtext: {
-//     fontSize: 12,
-//     color: '#999',
-//     marginTop: 8,
-//   },
-//   bottomSpacing: {
-//     height: 40,
-//   },
+//   publishGradient: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', paddingVertical: 16, gap: 8 },
+//   publishButtonText: { fontSize: 16, fontWeight: 'bold', color: '#fff' },
+//   loadingOverlay: { ...StyleSheet.absoluteFillObject, backgroundColor: 'rgba(0,0,0,0.7)', justifyContent: 'center', alignItems: 'center', zIndex: 999 },
+//   loadingBox: { backgroundColor: '#fff', borderRadius: 20, padding: 30, alignItems: 'center', minWidth: 200 },
+//   loadingText: { fontSize: 16, fontWeight: 'bold', color: '#333', marginTop: 16 },
+//   loadingSubtext: { fontSize: 12, color: '#999', marginTop: 8 },
+//   bottomSpacing: { height: 40 },
 // });
+
 
 // screens/TableauDeBord/PathConfirmationScreen.js
 import React, { useState } from 'react';
@@ -684,7 +488,6 @@ import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { uploadToCloudinary, createPath } from '../../services/authService'; // ✅ createPath depuis authService
 import { usePaths } from '../../context/PathContext';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default function PathConfirmationScreen({ route, navigation }) {
   const {
@@ -734,6 +537,15 @@ export default function PathConfirmationScreen({ route, navigation }) {
         text: (step.text || '').replace(/\n/g, ' ').trim(),
       }));
 
+      // ✅ GPS envoyé au backend
+      const gpsCoordinates = route.params.coordinates || [];
+      const cleanedGpsPoints = gpsCoordinates.map((coord, index) => ({
+        latitude: coord.latitude,
+        longitude: coord.longitude,
+        timestamp: coord.timestamp || Date.now(),
+        order: index,
+      }));
+
       const pathData = {
         title: `${departure} → ${destination}`,
         start_label: departure || '',
@@ -754,9 +566,11 @@ export default function PathConfirmationScreen({ route, navigation }) {
         duration: Math.round(videoDuration) || 0,
         is_official: pathType === 'official',
         steps: cleanedSteps,
+        gps_points: cleanedGpsPoints, // ✅ GPS envoyé au backend
       };
 
       console.log('📤 Envoi au backend:', JSON.stringify(pathData, null, 2));
+      console.log(`📍 ${cleanedGpsPoints.length} points GPS envoyés`);
 
       setUploadProgress(75);
 
@@ -766,17 +580,6 @@ export default function PathConfirmationScreen({ route, navigation }) {
 
       if (result.ok) {
         console.log('✅ Chemin créé avec ID:', result.data?.id);
-
-        const gpsCoordinates = route.params.coordinates || [];
-
-        if (gpsCoordinates.length > 0 && result.data?.id) {
-          await AsyncStorage.setItem(
-            `path_gps_${result.data.id}`,
-            JSON.stringify(gpsCoordinates)
-          );
-          console.log(`📍 ${gpsCoordinates.length} points GPS sauvegardés localement`);
-        }
-
         console.log('✅ Rafraîchissement de la liste...');
         await refreshPaths();
 
@@ -955,6 +758,7 @@ export default function PathConfirmationScreen({ route, navigation }) {
               </View>
             </View>
 
+            {/* ✅ Affichage GPS */}
             {route.params.coordinates && route.params.coordinates.length > 0 && (
               <>
                 <View style={styles.divider} />
@@ -963,7 +767,10 @@ export default function PathConfirmationScreen({ route, navigation }) {
                   <View style={styles.infoTextContainer}>
                     <Text style={styles.infoLabel}>Points GPS</Text>
                     <Text style={styles.infoValue}>
-                      {route.params.coordinates.length} points enregistrés
+                      {route.params.coordinates.length} points enregistrés ✅
+                    </Text>
+                    <Text style={styles.coordsText}>
+                      Sera sauvegardé sur le serveur
                     </Text>
                   </View>
                 </View>
@@ -1122,4 +929,4 @@ const styles = StyleSheet.create({
   loadingText: { fontSize: 16, fontWeight: 'bold', color: '#333', marginTop: 16 },
   loadingSubtext: { fontSize: 12, color: '#999', marginTop: 8 },
   bottomSpacing: { height: 40 },
-});
+}); 

@@ -17,7 +17,12 @@
       "supportsTablet": true,
       "bundleIdentifier": "com.antaseck27.tektalmobile",
       "infoPlist": {
-        "ITSAppUsesNonExemptEncryption": false
+        "ITSAppUsesNonExemptEncryption": false,
+        "NSCameraUsageDescription": "Tektal utilise la caméra pour enregistrer les chemins.",
+        "NSMicrophoneUsageDescription": "Tektal utilise le microphone pour enregistrer les vidéos.",
+        "NSLocationWhenInUseUsageDescription": "Tektal utilise votre position pour enregistrer le trajet GPS.",
+        "NSLocationAlwaysUsageDescription": "Tektal utilise votre position pour enregistrer le trajet GPS.",
+        "NSPhotoLibraryUsageDescription": "Tektal accède à la galerie pour sélectionner des vidéos."
       }
     },
     "android": {
@@ -27,6 +32,16 @@
       },
       "edgeToEdgeEnabled": true,
       "package": "com.antaseck27.tektalmobile",
+      "permissions": [
+        "android.permission.CAMERA",
+        "android.permission.RECORD_AUDIO",
+        "android.permission.ACCESS_FINE_LOCATION",
+        "android.permission.ACCESS_COARSE_LOCATION",
+        "android.permission.READ_EXTERNAL_STORAGE",
+        "android.permission.WRITE_EXTERNAL_STORAGE",
+        "android.permission.READ_MEDIA_VIDEO",
+        "android.permission.READ_MEDIA_IMAGES"
+      ],
       "intentFilters": [
         {
           "action": "VIEW",
@@ -52,7 +67,22 @@
     },
     "plugins": [
       "expo-video",
-      "expo-asset"
+      "expo-asset",
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "Tektal utilise la caméra pour enregistrer les chemins.",
+          "microphonePermission": "Tektal utilise le microphone pour enregistrer les vidéos.",
+          "recordAudioAndroid": true
+        }
+      ],
+      [
+        "expo-location",
+        {
+          "locationAlwaysAndWhenInUsePermission": "Tektal utilise votre position pour enregistrer le trajet GPS."
+        }
+      ],
+      "expo-secure-store"
     ]
   }
 }

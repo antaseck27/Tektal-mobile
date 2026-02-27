@@ -335,15 +335,15 @@ export async function getPublicPaths(params = {}) {
  */
 
 export async function getPendingPaths() {
-  return getAllPaths({ status: "pending" });
+  return getAllPaths({ status: "draft" });
 }
 
 export async function getApprovedPaths() {
-  return getAllPaths({ status: "approved" });
+  return getAllPaths({ status: "published" });
 }
 
 export async function getRejectedPaths() {
-  return getAllPaths({ status: "rejected" });
+  return getAllPaths({ status: "hidden" });
 }
 
 export async function getOfficialPaths() {
