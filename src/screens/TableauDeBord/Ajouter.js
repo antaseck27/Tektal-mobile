@@ -459,7 +459,6 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
-import * as ImagePicker from 'expo-image-picker';
 import { getEstablishments, getPathsByEstablishment } from '../../services/authService';
 
 export default function Ajouter({ navigation }) {
@@ -489,7 +488,6 @@ export default function Ajouter({ navigation }) {
   const [locations, setLocations] = useState([]);
   const [loadingLocations, setLoadingLocations] = useState(false);
   const [showDestinationModal, setShowDestinationModal] = useState(false);
-  const [showSourceModal, setShowSourceModal] = useState(false);
 
   useEffect(() => {
     (async () => {
@@ -550,13 +548,9 @@ export default function Ajouter({ navigation }) {
     return true;
   };
 
-  const handleChooseSource = () => {
-    if (!validate()) return;
-    setShowSourceModal(true);
-  };
-
   const handleRecord = () => {
-    setShowSourceModal(false);
+    if (!validate()) return;
+    
     navigation.navigate('VideoRecorder', {
       departure: departure.trim(),
       destination,
@@ -564,39 +558,6 @@ export default function Ajouter({ navigation }) {
       videoSource: 'camera',
       establishmentId: selectedEstablishment?.id,
     });
-  };
-
-  const handleGallery = async () => {
-    setShowSourceModal(false);
-    setTimeout(async () => {
-      try {
-        const perm = await ImagePicker.requestMediaLibraryPermissionsAsync();
-        if (!perm.granted) {
-          Alert.alert('Permission refusée', "L'accès à la galerie est requis. Activez-le dans les Réglages.");
-          return;
-        }
-        const result = await ImagePicker.launchImageLibraryAsync({
-          mediaTypes: ['videos'],
-          allowsEditing: false,
-          quality: 1,
-        });
-        if (!result.canceled && result.assets?.length > 0) {
-          const asset = result.assets[0];
-          const durationSec = asset.duration ? Math.round(asset.duration / 1000) : 30;
-          navigation.navigate('VideoRecorder', {
-            departure: departure.trim(),
-            destination,
-            pathType,
-            videoSource: 'gallery',
-            selectedVideo: { uri: asset.uri, duration: durationSec },
-            establishmentId: selectedEstablishment?.id,
-          });
-        }
-      } catch (e) {
-        console.error('❌ Erreur galerie:', e);
-        Alert.alert('Erreur', "Impossible d'ouvrir la galerie.");
-      }
-    }, 500);
   };
 
   return (
@@ -709,6 +670,7 @@ export default function Ajouter({ navigation }) {
           {[
             'Choisissez votre établissement',
             'Sélectionnez la destination dans la liste',
+            'Enregistrez votre vidéo du trajet',
             'Découpez en 2 à 6 étapes importantes',
             'Publiez et aidez la communauté !',
           ].map((txt, i) => (
@@ -719,9 +681,9 @@ export default function Ajouter({ navigation }) {
           ))}
         </View>
 
-        <TouchableOpacity style={s.btn} onPress={handleChooseSource}>
-          <Ionicons name="add-circle-outline" size={24} color="#fff" />
-          <Text style={s.btnTxt}>Choisir la source de la vidéo</Text>
+        <TouchableOpacity style={s.btn} onPress={handleRecord}>
+          <Ionicons name="videocam" size={24} color="#fff" />
+          <Text style={s.btnTxt}>Enregistrer la vidéo</Text>
         </TouchableOpacity>
 
       </View>
@@ -809,38 +771,6 @@ export default function Ajouter({ navigation }) {
         </View>
       </Modal>
 
-      {/* ══ MODAL SOURCE VIDÉO ══ */}
-      <Modal visible={showSourceModal} animationType="slide" transparent onRequestClose={() => setShowSourceModal(false)}>
-        <View style={s.overlay}>
-          <View style={[s.sourceSheet, { backgroundColor: theme.sheetBg }]}>
-            <Text style={[s.sourceTitle, { color: theme.text }]}>Choisir la source de la vidéo</Text>
-            <TouchableOpacity style={[s.sourceOption, { backgroundColor: theme.optionBg, borderColor: theme.border }]} onPress={handleRecord}>
-              <View style={[s.sourceIcon, { backgroundColor: '#FF3B30' }]}>
-                <Ionicons name="videocam" size={26} color="#fff" />
-              </View>
-              <View style={s.sourceTxt}>
-                <Text style={[s.sourceOptTitle, { color: theme.text }]}>Enregistrement</Text>
-                <Text style={[s.sourceOptDesc, { color: theme.subtext }]}>Filmez le trajet en temps réel</Text>
-              </View>
-              <Ionicons name="chevron-forward" size={20} color="#ccc" />
-            </TouchableOpacity>
-            <TouchableOpacity style={[s.sourceOption, { backgroundColor: theme.optionBg, borderColor: theme.border }]} onPress={handleGallery}>
-              <View style={[s.sourceIcon, { backgroundColor: '#007AFF' }]}>
-                <Ionicons name="images" size={26} color="#fff" />
-              </View>
-              <View style={s.sourceTxt}>
-                <Text style={[s.sourceOptTitle, { color: theme.text }]}>Galerie</Text>
-                <Text style={[s.sourceOptDesc, { color: theme.subtext }]}>Choisissez une vidéo existante</Text>
-              </View>
-              <Ionicons name="chevron-forward" size={20} color="#ccc" />
-            </TouchableOpacity>
-            <TouchableOpacity style={[s.cancelBtn, { backgroundColor: theme.cancelBg }]} onPress={() => setShowSourceModal(false)}>
-              <Text style={[s.cancelTxt, { color: theme.subtext }]}>Annuler</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-      </Modal>
-
     </ScrollView>
   );
 }
@@ -883,13 +813,4 @@ const s = StyleSheet.create({
   listItem: { flexDirection: 'row', alignItems: 'center', paddingVertical: 14, paddingHorizontal: 12, borderRadius: 10, gap: 12, marginBottom: 4 },
   listItemTxt: { flex: 1, fontSize: 16 },
   listItemTxtSel: { fontWeight: '600', color: '#FEBD00' },
-  sourceSheet: { borderTopLeftRadius: 24, borderTopRightRadius: 24, paddingHorizontal: 20, paddingTop: 24, paddingBottom: 40 },
-  sourceTitle: { fontSize: 18, fontWeight: 'bold', marginBottom: 20, textAlign: 'center' },
-  sourceOption: { flexDirection: 'row', alignItems: 'center', borderRadius: 14, padding: 16, marginBottom: 12, gap: 14, borderWidth: 1 },
-  sourceIcon: { width: 50, height: 50, borderRadius: 25, justifyContent: 'center', alignItems: 'center' },
-  sourceTxt: { flex: 1 },
-  sourceOptTitle: { fontSize: 16, fontWeight: 'bold' },
-  sourceOptDesc: { fontSize: 13, marginTop: 2 },
-  cancelBtn: { marginTop: 4, paddingVertical: 16, alignItems: 'center', borderRadius: 12 },
-  cancelTxt: { fontSize: 16, fontWeight: '600' },
 });
