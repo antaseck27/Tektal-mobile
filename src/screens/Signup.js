@@ -1,4 +1,6 @@
 
+
+
 // import React, { useState } from "react";
 // import {
 //   View,
@@ -30,7 +32,8 @@
 //     setStatus({ type: "", message: "" });
 
 //     try {
-//       const res = await register({ email, password, full_name: nom });
+//       // ✅ Utilise "name" comme attendu par le backend
+//       const res = await register({ email, password, name: nom });
 //       if (res.ok) {
 //         setStatus({ type: "success", message: "Compte créé. Vérifie ton email." });
 //         setTimeout(() => navigation.navigate("Login"), 800);
@@ -105,7 +108,7 @@
 //             {loading ? (
 //               <ActivityIndicator color="#FFF" />
 //             ) : (
-//               <Text style={styles.primaryButtonText}>S’inscrire</Text>
+//               <Text style={styles.primaryButtonText}>S'inscrire</Text>
 //             )}
 //           </TouchableOpacity>
 
@@ -127,11 +130,9 @@
 
 // const styles = StyleSheet.create({
 //   container: { flex: 1, backgroundColor: "#FEBD00" },
-
 //   topBg: { flex: 4, zIndex: 0 },
 //   bgImage: { flex: 1 },
 //   gradient: { ...StyleSheet.absoluteFillObject, opacity: 0.75 },
-
 //   card: {
 //     flex: 7,
 //     backgroundColor: "#FFF",
@@ -144,12 +145,9 @@
 //     zIndex: 2,
 //     elevation: 2,
 //   },
-
 //   back: { color: "black", marginBottom: 12 },
 //   title: { fontSize: 24, fontWeight: "700", textAlign: "center", marginBottom: 16 },
-
 //   formBlock: { alignItems: "center", marginTop: 20, gap: 28 },
-
 //   input: {
 //     width: "100%",
 //     backgroundColor: "#D9D9D9",
@@ -158,7 +156,6 @@
 //     paddingHorizontal: 28,
 //     color: "#FFF",
 //   },
-
 //   primaryButton: {
 //     marginTop: 20,
 //     backgroundColor: "#F4B000",
@@ -170,13 +167,11 @@
 //   },
 //   primaryButtonDisabled: { opacity: 0.7 },
 //   primaryButtonText: { color: "#FFF", fontWeight: "600" },
-
 //   statusText: { marginTop: 12, textAlign: "center", fontWeight: "600" },
 //   statusSuccess: { color: "#1f9d55" },
 //   statusError: { color: "#c53030" },
 // });
-
-
+// Signup.js
 import React, { useState } from "react";
 import {
   View,
@@ -188,12 +183,14 @@ import {
   ActivityIndicator,
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
+import { Ionicons } from "@expo/vector-icons";
 import { register } from "../services/authService";
 
 export default function Signup({ navigation }) {
   const [nom, setNom] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [status, setStatus] = useState({ type: "", message: "" });
 
@@ -208,7 +205,6 @@ export default function Signup({ navigation }) {
     setStatus({ type: "", message: "" });
 
     try {
-      // ✅ Utilise "name" comme attendu par le backend
       const res = await register({ email, password, name: nom });
       if (res.ok) {
         setStatus({ type: "success", message: "Compte créé. Vérifie ton email." });
@@ -226,10 +222,7 @@ export default function Signup({ navigation }) {
   return (
     <View style={styles.container}>
       <View style={styles.topBg}>
-        <ImageBackground
-          source={require("../../assets/img2.jpeg")}
-          style={styles.bgImage}
-        >
+        <ImageBackground source={require("../../assets/img2.jpeg")} style={styles.bgImage}>
           <LinearGradient
             pointerEvents="none"
             colors={["#D9A600", "#D9A600", "#D9D9D9"]}
@@ -267,25 +260,34 @@ export default function Signup({ navigation }) {
             keyboardType="email-address"
           />
 
-          <TextInput
-            style={styles.input}
-            placeholder="Mot de passe"
-            placeholderTextColor="#FFF"
-            value={password}
-            onChangeText={setPassword}
-            secureTextEntry
-          />
+          <View style={styles.passwordWrap}>
+            <TextInput
+              style={styles.passwordInput}
+              placeholder="Mot de passe"
+              placeholderTextColor="#FFF"
+              value={password}
+              onChangeText={setPassword}
+              secureTextEntry={!showPassword}
+            />
+            <TouchableOpacity
+              onPress={() => setShowPassword((prev) => !prev)}
+              style={styles.eyeBtn}
+              activeOpacity={0.7}
+            >
+              <Ionicons
+                name={showPassword ? "eye-off-outline" : "eye-outline"}
+                size={22}
+                color="#FFF"
+              />
+            </TouchableOpacity>
+          </View>
 
           <TouchableOpacity
             style={[styles.primaryButton, loading && styles.primaryButtonDisabled]}
             onPress={handleSignup}
             disabled={loading}
           >
-            {loading ? (
-              <ActivityIndicator color="#FFF" />
-            ) : (
-              <Text style={styles.primaryButtonText}>S'inscrire</Text>
-            )}
+            {loading ? <ActivityIndicator color="#FFF" /> : <Text style={styles.primaryButtonText}>S'inscrire</Text>}
           </TouchableOpacity>
 
           {status.message ? (
@@ -324,6 +326,7 @@ const styles = StyleSheet.create({
   back: { color: "black", marginBottom: 12 },
   title: { fontSize: 24, fontWeight: "700", textAlign: "center", marginBottom: 16 },
   formBlock: { alignItems: "center", marginTop: 20, gap: 28 },
+
   input: {
     width: "100%",
     backgroundColor: "#D9D9D9",
@@ -332,6 +335,25 @@ const styles = StyleSheet.create({
     paddingHorizontal: 28,
     color: "#FFF",
   },
+
+  passwordWrap: {
+    width: "100%",
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#D9D9D9",
+    borderRadius: 24,
+    paddingRight: 14,
+  },
+  passwordInput: {
+    flex: 1,
+    paddingVertical: 19,
+    paddingHorizontal: 28,
+    color: "#FFF",
+  },
+  eyeBtn: {
+    padding: 4,
+  },
+
   primaryButton: {
     marginTop: 20,
     backgroundColor: "#F4B000",
