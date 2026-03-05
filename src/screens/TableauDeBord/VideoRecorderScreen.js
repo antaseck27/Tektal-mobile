@@ -958,64 +958,66 @@ export default function VideoRecorderScreen({ route, navigation }) {
   if (step === 'recording') {
     return (
       <View style={styles.container}>
-        <CameraView ref={cameraRef} style={styles.camera} facing={facing} mode="video">
-          <View style={styles.overlay}>
-            <View style={styles.header}>
-              <TouchableOpacity style={styles.closeButton} onPress={() => navigation.goBack()}>
-                <Ionicons name="arrow-back" size={30} color="#fff" />
-              </TouchableOpacity>
-              <View style={styles.headerInfo}>
-                <Text style={styles.headerTitle}>{departure} → {destination}</Text>
-                <Text style={styles.headerSubtitle}>
-                  {pathType === 'official' ? '🛡️ Officiel' : '👥 Communautaire'}
-                </Text>
-              </View>
-              <TouchableOpacity
-                style={styles.flipButton}
-                onPress={() => setFacing(facing === 'back' ? 'front' : 'back')}
-              >
-                <Ionicons name="camera-reverse" size={30} color="#fff" />
-              </TouchableOpacity>
-            </View>
+        {/* ✅ CameraView SANS children pour expo-camera ~17 */}
+        <CameraView ref={cameraRef} style={StyleSheet.absoluteFill} facing={facing} mode="video" />
 
-            <View style={styles.gpsIndicator}>
-              <Ionicons
-                name={currentLocation ? 'location' : 'location-outline'}
-                size={16}
-                color={currentLocation ? '#34C759' : '#999'}
-              />
-              <Text style={styles.gpsIndicatorText}>
-                {currentLocation ? 'GPS actif' : 'GPS non disponible'}
+        {/* ✅ Overlay en position absolue PAR DESSUS la caméra */}
+        <View style={styles.overlay} pointerEvents="box-none">
+          <View style={styles.header}>
+            <TouchableOpacity style={styles.closeButton} onPress={() => navigation.goBack()}>
+              <Ionicons name="arrow-back" size={30} color="#fff" />
+            </TouchableOpacity>
+            <View style={styles.headerInfo}>
+              <Text style={styles.headerTitle}>{departure} → {destination}</Text>
+              <Text style={styles.headerSubtitle}>
+                {pathType === 'official' ? '🛡️ Officiel' : '👥 Communautaire'}
               </Text>
-              {isRecording && <Text style={styles.gpsCount}>{coordinates.length} pts</Text>}
             </View>
+            <TouchableOpacity
+              style={styles.flipButton}
+              onPress={() => setFacing(facing === 'back' ? 'front' : 'back')}
+            >
+              <Ionicons name="camera-reverse" size={30} color="#fff" />
+            </TouchableOpacity>
+          </View>
 
-            <View style={styles.timerContainer}>
-              <View style={styles.timerBox}>
-                <Text style={styles.timerText}>
-                  {formatTime(recordingTime)} / {formatTime(MAX_RECORDING_TIME)}
-                </Text>
-              </View>
-            </View>
+          <View style={styles.gpsIndicator}>
+            <Ionicons
+              name={currentLocation ? 'location' : 'location-outline'}
+              size={16}
+              color={currentLocation ? '#34C759' : '#999'}
+            />
+            <Text style={styles.gpsIndicatorText}>
+              {currentLocation ? 'GPS actif' : 'GPS non disponible'}
+            </Text>
+            {isRecording && <Text style={styles.gpsCount}>{coordinates.length} pts</Text>}
+          </View>
 
-            {!isRecording && (
-              <View style={styles.instructionsContainer}>
-                <Text style={styles.instructionsText}>📹 Enregistrez votre trajet en vidéo</Text>
-                <Text style={styles.instructionsSubtext}>📍 Le GPS sera capturé automatiquement</Text>
-              </View>
-            )}
-
-            <View style={styles.controls}>
-              <TouchableOpacity
-                style={[styles.recordButton, isRecording && styles.recordButtonActive]}
-                onPress={isRecording ? stopRecording : startRecording}
-              >
-                <View style={[styles.recordButtonInner, isRecording && styles.recordButtonInnerActive]} />
-              </TouchableOpacity>
-              {isRecording && <Text style={styles.recordingText}>● En cours...</Text>}
+          <View style={styles.timerContainer}>
+            <View style={styles.timerBox}>
+              <Text style={styles.timerText}>
+                {formatTime(recordingTime)} / {formatTime(MAX_RECORDING_TIME)}
+              </Text>
             </View>
           </View>
-        </CameraView>
+
+          {!isRecording && (
+            <View style={styles.instructionsContainer}>
+              <Text style={styles.instructionsText}>📹 Enregistrez votre trajet en vidéo</Text>
+              <Text style={styles.instructionsSubtext}>📍 Le GPS sera capturé automatiquement</Text>
+            </View>
+          )}
+
+          <View style={styles.controls}>
+            <TouchableOpacity
+              style={[styles.recordButton, isRecording && styles.recordButtonActive]}
+              onPress={isRecording ? stopRecording : startRecording}
+            >
+              <View style={[styles.recordButtonInner, isRecording && styles.recordButtonInnerActive]} />
+            </TouchableOpacity>
+            {isRecording && <Text style={styles.recordingText}>● En cours...</Text>}
+          </View>
+        </View>
       </View>
     );
   }
@@ -1069,7 +1071,7 @@ export default function VideoRecorderScreen({ route, navigation }) {
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#000' },
   camera: { flex: 1 },
-  overlay: { flex: 1 },
+  overlay: { ...StyleSheet.absoluteFillObject, flex: 1, justifyContent: 'space-between' },
   video: { flex: 1, backgroundColor: '#000' },
   permissionContainer: { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#f5f5f5', padding: 20 },
   permissionText: { fontSize: 20, fontWeight: 'bold', color: '#333', marginTop: 20, marginBottom: 10, textAlign: 'center' },
