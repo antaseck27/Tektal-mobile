@@ -220,8 +220,14 @@ export default function VideoRecorderScreen({ route, navigation }) {
       }
     }
 
+    // const result = await ImagePicker.launchImageLibraryAsync({
+    //   mediaTypes: ['video'],
+    //   allowsEditing: false,
+    //   quality: 1,
+    // });
+    // ✅ CORRECT
     const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ['video'],
+      mediaTypes: ImagePicker.MediaTypeOptions.Videos,  // ✅ Bon format
       allowsEditing: false,
       quality: 1,
     });
