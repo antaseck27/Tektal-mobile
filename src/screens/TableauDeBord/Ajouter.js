@@ -390,6 +390,9 @@
 //   cancelTxt: { fontSize: 16, fontWeight: '600', color: '#666' },
 // });
 
+
+
+
 // screens/TableauDeBord/Ajouter.js
 import React, { useState, useEffect } from 'react';
 import {
@@ -505,7 +508,7 @@ export default function Ajouter({ navigation }) {
       return;
     }
     const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Videos,
+      mediaTypes: ['video'],
       allowsEditing: false,
       quality: 1,
     });
@@ -874,7 +877,6 @@ const s = StyleSheet.create({
   cancelBtn: { marginTop: 4, paddingVertical: 16, alignItems: 'center', borderRadius: 12, backgroundColor: '#f5f5f5' },
   cancelTxt: { fontSize: 16, fontWeight: '600', color: '#666' },
 });
-
 // // screens/TableauDeBord/Ajouter.js
 // import React, { useState, useEffect } from 'react';
 // import {
