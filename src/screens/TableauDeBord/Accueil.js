@@ -1,4 +1,5 @@
 
+
 // import React, { useEffect, useState, useCallback } from 'react';
 // import {
 //   View,
@@ -112,6 +113,9 @@
 //               <Text style={styles.headerGreeting}>Bonjour 👋</Text>
 //               <Text style={styles.headerTitle}>{userName}</Text>
 //             </View>
+
+//             {/* Icône notification désactivée pour le moment */}
+//             {/*
 //             <TouchableOpacity style={styles.notificationButton}>
 //               <View style={styles.notificationIconContainer}>
 //                 <Ionicons name="notifications-outline" size={24} color="#fff" />
@@ -120,6 +124,8 @@
 //                 </View>
 //               </View>
 //             </TouchableOpacity>
+//             */}
+//             <View style={styles.headerRightPlaceholder} />
 //           </View>
 //         </LinearGradient>
 
@@ -156,6 +162,9 @@
 //             <Text style={styles.headerGreeting}>Bonjour 👋</Text>
 //             <Text style={styles.headerTitle}>{userName}</Text>
 //           </View>
+
+//           {/* Icône notification désactivée pour le moment */}
+//           {/*
 //           <TouchableOpacity style={styles.notificationButton}>
 //             <View style={styles.notificationIconContainer}>
 //               <Ionicons name="notifications-outline" size={24} color="#fff" />
@@ -166,6 +175,8 @@
 //               )}
 //             </View>
 //           </TouchableOpacity>
+//           */}
+//           <View style={styles.headerRightPlaceholder} />
 //         </View>
 //       </LinearGradient>
 
@@ -261,8 +272,6 @@
 //                 <TouchableOpacity style={styles.favoriteButton} onPress={() => handleToggleFavorite(path.id)} activeOpacity={0.6}>
 //                   <Ionicons name={path.isFavorite ? 'heart' : 'heart-outline'} size={24} color={path.isFavorite ? '#FF3B30' : '#ccc'} />
 //                 </TouchableOpacity>
-
-                
 //               </View>
 //             </TouchableOpacity>
 //           ))}
@@ -282,6 +291,7 @@
 //   headerContent: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
 //   headerGreeting: { fontSize: 16, fontWeight: '500', color: 'rgba(255,255,255,0.9)', marginBottom: 4 },
 //   headerTitle: { fontSize: 28, fontWeight: 'bold', color: '#fff', letterSpacing: 0.5 },
+//   headerRightPlaceholder: { width: 56, height: 56 },
 //   notificationButton: { padding: 8 },
 //   notificationIconContainer: { position: 'relative', width: 40, height: 40, borderRadius: 20, backgroundColor: 'rgba(255,255,255,0.2)', justifyContent: 'center', alignItems: 'center' },
 //   notificationBadge: { position: 'absolute', top: -2, right: -2, backgroundColor: '#FF3B30', minWidth: 18, height: 18, borderRadius: 9, justifyContent: 'center', alignItems: 'center', paddingHorizontal: 4, borderWidth: 2, borderColor: '#FFC837' },
@@ -330,6 +340,7 @@
 //   deleteButton: { padding: 8, marginLeft: 4 },
 //   bottomSpacing: { height: 32 },
 // });
+
 
 import React, { useEffect, useState, useCallback } from 'react';
 import {
@@ -383,15 +394,8 @@ export default function Accueil({ navigation }) {
     }
   }, []);
 
-  useEffect(() => {
-    loadUser();
-  }, [loadUser]);
-
-  useFocusEffect(
-    useCallback(() => {
-      loadUser();
-    }, [loadUser])
-  );
+  useEffect(() => { loadUser(); }, [loadUser]);
+  useFocusEffect(useCallback(() => { loadUser(); }, [loadUser]));
 
   const onRefresh = async () => {
     setRefreshing(true);
@@ -399,13 +403,8 @@ export default function Accueil({ navigation }) {
     setRefreshing(false);
   };
 
-  const handleOpenPath = (path) => {
-    navigation.navigate('VideoPlayer', { path });
-  };
-
-  const handleToggleFavorite = async (id) => {
-    await toggleFavorite(id);
-  };
+  const handleOpenPath = (path) => navigation.navigate('VideoPlayer', { path });
+  const handleToggleFavorite = async (id) => await toggleFavorite(id);
 
   const handleDeletePath = (path) => {
     Alert.alert(
@@ -444,22 +443,9 @@ export default function Accueil({ navigation }) {
               <Text style={styles.headerGreeting}>Bonjour 👋</Text>
               <Text style={styles.headerTitle}>{userName}</Text>
             </View>
-
-            {/* Icône notification désactivée pour le moment */}
-            {/*
-            <TouchableOpacity style={styles.notificationButton}>
-              <View style={styles.notificationIconContainer}>
-                <Ionicons name="notifications-outline" size={24} color="#fff" />
-                <View style={styles.notificationBadge}>
-                  <Text style={styles.notificationBadgeText}>0</Text>
-                </View>
-              </View>
-            </TouchableOpacity>
-            */}
             <View style={styles.headerRightPlaceholder} />
           </View>
         </LinearGradient>
-
         <View style={styles.emptyContainer}>
           <View style={styles.emptyIconContainer}>
             <Ionicons name="map-outline" size={80} color="#FEBD00" />
@@ -493,30 +479,23 @@ export default function Accueil({ navigation }) {
             <Text style={styles.headerGreeting}>Bonjour 👋</Text>
             <Text style={styles.headerTitle}>{userName}</Text>
           </View>
-
-          {/* Icône notification désactivée pour le moment */}
-          {/*
-          <TouchableOpacity style={styles.notificationButton}>
-            <View style={styles.notificationIconContainer}>
-              <Ionicons name="notifications-outline" size={24} color="#fff" />
-              {paths.length > 0 && (
-                <View style={styles.notificationBadge}>
-                  <Text style={styles.notificationBadgeText}>{paths.length}</Text>
-                </View>
-              )}
-            </View>
-          </TouchableOpacity>
-          */}
           <View style={styles.headerRightPlaceholder} />
         </View>
       </LinearGradient>
 
+      {/* ── Derniers chemins (horizontal) ── */}
       <View style={styles.featuredSection}>
         <View style={styles.sectionHeader}>
           <Text style={styles.sectionTitle}>Derniers chemins</Text>
         </View>
 
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.featuredScroll} snapToInterval={CARD_WIDTH + 16} decelerationRate="fast">
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={styles.featuredScroll}
+          snapToInterval={CARD_WIDTH + 16}
+          decelerationRate="fast"
+        >
           {paths.slice(0, 5).map((path, index) => (
             <TouchableOpacity
               key={path.id}
@@ -534,7 +513,6 @@ export default function Accueil({ navigation }) {
                     </View>
                   )}
                 </View>
-
                 <View style={styles.featuredInfo}>
                   <Text style={styles.featuredTitle} numberOfLines={2}>{path.title}</Text>
                   <Text style={styles.featuredCreator} numberOfLines={1}>Par {path.creator}</Text>
@@ -548,9 +526,15 @@ export default function Accueil({ navigation }) {
                       <Text style={styles.featuredMetaText}>Vidéo</Text>
                     </View>
                   </View>
+                  {/* ✅ Heure de publication */}
+                  {path.publishedAt && (
+                    <View style={styles.featuredDateItem}>
+                      <Ionicons name="calendar-outline" size={11} color="rgba(255,255,255,0.75)" />
+                      <Text style={styles.featuredDateText}>{path.publishedAt}</Text>
+                    </View>
+                  )}
                 </View>
               </LinearGradient>
-
               <View style={styles.playButtonOverlay}>
                 <View style={styles.playButton}>
                   <Ionicons name="play" size={18} color="#fff" />
@@ -561,6 +545,7 @@ export default function Accueil({ navigation }) {
         </ScrollView>
       </View>
 
+      {/* ── Tous les chemins (liste) ── */}
       <View style={styles.recentSection}>
         <View style={styles.sectionHeader}>
           <Text style={styles.sectionTitle}>Tous les chemins</Text>
@@ -597,6 +582,13 @@ export default function Accueil({ navigation }) {
                     <Text style={styles.metaText}>Vidéo</Text>
                   </View>
                 </View>
+                {/* ✅ Heure de publication */}
+                {path.publishedAt && (
+                  <View style={styles.publishedAtRow}>
+                    <Ionicons name="calendar-outline" size={11} color="#bbb" />
+                    <Text style={styles.publishedAtText}>{path.publishedAt}</Text>
+                  </View>
+                )}
               </View>
 
               <View style={styles.cardActions}>
@@ -623,10 +615,6 @@ const styles = StyleSheet.create({
   headerGreeting: { fontSize: 16, fontWeight: '500', color: 'rgba(255,255,255,0.9)', marginBottom: 4 },
   headerTitle: { fontSize: 28, fontWeight: 'bold', color: '#fff', letterSpacing: 0.5 },
   headerRightPlaceholder: { width: 56, height: 56 },
-  notificationButton: { padding: 8 },
-  notificationIconContainer: { position: 'relative', width: 40, height: 40, borderRadius: 20, backgroundColor: 'rgba(255,255,255,0.2)', justifyContent: 'center', alignItems: 'center' },
-  notificationBadge: { position: 'absolute', top: -2, right: -2, backgroundColor: '#FF3B30', minWidth: 18, height: 18, borderRadius: 9, justifyContent: 'center', alignItems: 'center', paddingHorizontal: 4, borderWidth: 2, borderColor: '#FFC837' },
-  notificationBadgeText: { color: '#fff', fontSize: 10, fontWeight: 'bold' },
   emptyContainer: { flex: 1, justifyContent: 'center', alignItems: 'center', padding: 32, marginTop: 40 },
   emptyIconContainer: { width: 140, height: 140, borderRadius: 70, backgroundColor: '#FFF8E1', justifyContent: 'center', alignItems: 'center', marginBottom: 24 },
   emptyTitle: { fontSize: 22, fontWeight: 'bold', color: '#1a1a1a', marginBottom: 12, textAlign: 'center' },
@@ -638,7 +626,7 @@ const styles = StyleSheet.create({
   sectionHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 20, marginBottom: 16 },
   sectionTitle: { fontSize: 20, fontWeight: 'bold', color: '#1a1a1a', letterSpacing: 0.3 },
   featuredScroll: { paddingRight: 20 },
-  featuredCard: { width: CARD_WIDTH, height: 200, marginRight: 8, borderRadius: 20, overflow: 'hidden', elevation: 6, shadowColor: '#000', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.15, shadowRadius: 12, backgroundColor: '#fff' },
+  featuredCard: { width: CARD_WIDTH, height: 220, marginRight: 8, borderRadius: 20, overflow: 'hidden', elevation: 6, shadowColor: '#000', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.15, shadowRadius: 12, backgroundColor: '#fff' },
   featuredImage: { width: '100%', height: '100%' },
   featuredGradient: { ...StyleSheet.absoluteFillObject, justifyContent: 'space-between', padding: 16 },
   featuredTopBadges: { flexDirection: 'row', justifyContent: 'flex-end' },
@@ -650,6 +638,9 @@ const styles = StyleSheet.create({
   featuredMeta: { flexDirection: 'row', gap: 12 },
   featuredMetaItem: { flexDirection: 'row', alignItems: 'center', backgroundColor: 'rgba(255,255,255,0.2)', paddingHorizontal: 8, paddingVertical: 4, borderRadius: 12 },
   featuredMetaText: { color: '#fff', fontSize: 12, marginLeft: 4, fontWeight: '500' },
+  // ✅ Date publication (featured)
+  featuredDateItem: { flexDirection: 'row', alignItems: 'center', marginTop: 6, gap: 4 },
+  featuredDateText: { color: 'rgba(255,255,255,0.75)', fontSize: 10 },
   playButtonOverlay: { position: 'absolute', bottom: 16, right: 16 },
   playButton: { width: 44, height: 44, borderRadius: 22, backgroundColor: '#FEBD00', justifyContent: 'center', alignItems: 'center', elevation: 8, shadowColor: '#000', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.3, shadowRadius: 8 },
   recentSection: { marginTop: 16, paddingHorizontal: 20 },
@@ -658,16 +649,18 @@ const styles = StyleSheet.create({
   pathCard: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#fff', borderRadius: 16, overflow: 'hidden', elevation: 2, shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.08, shadowRadius: 8, padding: 12 },
   pathThumbnailContainer: { position: 'relative', width: 100, height: 100, borderRadius: 12, overflow: 'hidden' },
   pathThumbnail: { width: '100%', height: '100%' },
-  officialBadgeSmall: { position: 'absolute', top: 6, right: 6, backgroundColor: 'rgba(255, 215, 0, 0.95)', width: 22, height: 22, borderRadius: 11, justifyContent: 'center', alignItems: 'center' },
-  thumbnailPlayButton: { position: 'absolute', bottom: 6, right: 6, width: 28, height: 28, borderRadius: 14, backgroundColor: 'rgba(254, 189, 0, 0.95)', justifyContent: 'center', alignItems: 'center' },
+  officialBadgeSmall: { position: 'absolute', top: 6, right: 6, backgroundColor: 'rgba(255,215,0,0.95)', width: 22, height: 22, borderRadius: 11, justifyContent: 'center', alignItems: 'center' },
+  thumbnailPlayButton: { position: 'absolute', bottom: 6, right: 6, width: 28, height: 28, borderRadius: 14, backgroundColor: 'rgba(254,189,0,0.95)', justifyContent: 'center', alignItems: 'center' },
   pathInfo: { flex: 1, marginLeft: 16, justifyContent: 'center' },
   pathTitle: { fontSize: 15, fontWeight: '700', color: '#1a1a1a', marginBottom: 4, lineHeight: 20 },
-  pathCreator: { fontSize: 13, color: '#666', marginBottom: 6 },
-  pathMeta: { flexDirection: 'row', gap: 12 },
+  pathCreator: { fontSize: 13, color: '#666', marginBottom: 4 },
+  pathMeta: { flexDirection: 'row', gap: 12, marginBottom: 2 },
   metaItem: { flexDirection: 'row', alignItems: 'center' },
   metaText: { fontSize: 12, color: '#999', marginLeft: 4, fontWeight: '500' },
+  // ✅ Date publication (liste)
+  publishedAtRow: { flexDirection: 'row', alignItems: 'center', marginTop: 3, gap: 4 },
+  publishedAtText: { fontSize: 11, color: '#bbb' },
   cardActions: { flexDirection: 'row', alignItems: 'center', marginLeft: 4 },
   favoriteButton: { padding: 8 },
-  deleteButton: { padding: 8, marginLeft: 4 },
   bottomSpacing: { height: 32 },
 });
