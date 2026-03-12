@@ -1,5 +1,7 @@
 
 
+
+
 // // src/services/authService.js
 // import * as SecureStore from "expo-secure-store";
 // import { API_URL } from "../config/api";
@@ -152,11 +154,12 @@
 // // AUTHENTICATION
 // // ========================================
 
-// export async function register({ email, password, full_name }) {
+// // ✅ Utilise "name" comme attendu par le backend
+// export async function register({ email, password, name }) {
 //   const res = await fetch(`${API_URL}/api/auth/users/`, {
 //     method: "POST",
 //     headers: { "Content-Type": "application/json" },
-//     body: JSON.stringify({ email, password, full_name }),
+//     body: JSON.stringify({ email, password, name }),
 //   });
 //   const data = await parseJson(res);
 //   return { ok: res.ok, status: res.status, data };
@@ -284,7 +287,6 @@
 //   try {
 //     const first = await postCreate(`${API_URL}/api/paths/create/`, pathData);
 //     if (first.status !== 405) return first;
-
 //     return await postCreate(`${API_URL}/api/paths/`, pathData);
 //   } catch (error) {
 //     console.error("❌ Erreur réseau:", error);
@@ -299,6 +301,20 @@
 //     return { ok: res.ok, status: res.status, data };
 //   } catch (error) {
 //     console.error("❌ Erreur récupération chemins:", error);
+//     return { ok: false, error: error.message };
+//   }
+// }
+
+// // ✅ Chemins filtrés par établissement
+// export async function getPathsByEstablishment(establishmentId) {
+//   try {
+//     const res = await authFetch(
+//       `${API_URL}/api/paths/?establishment_id=${establishmentId}`
+//     );
+//     const data = await parseJson(res);
+//     return { ok: res.ok, status: res.status, data };
+//   } catch (error) {
+//     console.error("❌ Erreur récupération chemins établissement:", error);
 //     return { ok: false, error: error.message };
 //   }
 // }
@@ -352,6 +368,22 @@
 // }
 
 // // ========================================
+// // ÉTABLISSEMENTS
+// // ========================================
+
+// // ✅ Liste tous les établissements
+// export async function getEstablishments() {
+//   try {
+//     const res = await authFetch(`${API_URL}/api/establishments/`);
+//     const data = await parseJson(res);
+//     return { ok: res.ok, status: res.status, data };
+//   } catch (error) {
+//     console.error("❌ Erreur récupération établissements:", error);
+//     return { ok: false, error: error.message };
+//   }
+// }
+
+// // ========================================
 // // ADMIN
 // // ========================================
 
@@ -360,6 +392,7 @@
 //   const data = await parseJson(res);
 //   return { ok: res.ok, status: res.status, data };
 // }
+
 
 
 
@@ -408,7 +441,7 @@ async function parseResponseSafely(res) {
   }
 }
 
-// Requete auth avec retry auto sur 401 (refresh token)
+// Requête auth avec retry auto sur 401 (refresh token)
 async function authFetch(url, options = {}, retry = true) {
   const access = await getAccessToken();
 
@@ -475,16 +508,12 @@ export async function uploadToCloudinary(videoUri) {
     formData.append("filename_override", filename);
 
     console.log("4️⃣ Envoi vers Cloudinary...");
-    console.log("🌐 URL:", "https://api.cloudinary.com/v1_1/dbqexsya0/video/upload");
-
     const startTime = Date.now();
 
     const res = await fetch("https://api.cloudinary.com/v1_1/dbqexsya0/video/upload", {
       method: "POST",
       body: formData,
-      headers: {
-        "Content-Type": "multipart/form-data",
-      },
+      headers: { "Content-Type": "multipart/form-data" },
     });
 
     const endTime = Date.now();
@@ -501,7 +530,6 @@ export async function uploadToCloudinary(videoUri) {
 
     console.log("✅ Upload réussi! URL:", data.secure_url);
     console.log("========== FIN DEBUG ==========");
-
     return { ok: true, data };
   } catch (error) {
     console.error("❌ Exception Cloudinary:", error);
@@ -515,7 +543,6 @@ export async function uploadToCloudinary(videoUri) {
 // AUTHENTICATION
 // ========================================
 
-// ✅ Utilise "name" comme attendu par le backend
 export async function register({ email, password, name }) {
   const res = await fetch(`${API_URL}/api/auth/users/`, {
     method: "POST",
@@ -630,16 +657,13 @@ export async function logout() {
 
 async function postCreate(url, pathData) {
   console.log("📤 Envoi vers:", url);
-
   const res = await authFetch(url, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(pathData),
   });
-
   const data = await parseResponseSafely(res);
   console.log("📥 Réponse backend:", res.status, data);
-
   return { ok: res.ok, status: res.status, data };
 }
 
@@ -666,12 +690,9 @@ export async function getPaths() {
   }
 }
 
-// ✅ Chemins filtrés par établissement
 export async function getPathsByEstablishment(establishmentId) {
   try {
-    const res = await authFetch(
-      `${API_URL}/api/paths/?establishment_id=${establishmentId}`
-    );
+    const res = await authFetch(`${API_URL}/api/paths/?establishment_id=${establishmentId}`);
     const data = await parseJson(res);
     return { ok: res.ok, status: res.status, data };
   } catch (error) {
@@ -728,11 +749,23 @@ export async function getSavedPaths() {
   }
 }
 
+// ✅ NOUVEAU — Récupère le profil public d'un user par son ID
+// Utilisé par PathContext pour résoudre le vrai nom du créateur
+export async function getUserById(userId) {
+  try {
+    const res = await authFetch(`${API_URL}/api/auth/users/${userId}/`);
+    const data = await parseJson(res);
+    return { ok: res.ok, status: res.status, data };
+  } catch (error) {
+    console.error("Erreur récupération user:", error);
+    return { ok: false, error: error.message };
+  }
+}
+
 // ========================================
 // ÉTABLISSEMENTS
 // ========================================
 
-// ✅ Liste tous les établissements
 export async function getEstablishments() {
   try {
     const res = await authFetch(`${API_URL}/api/establishments/`);
