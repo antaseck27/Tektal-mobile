@@ -396,6 +396,11 @@
 
 
 
+
+
+
+
+
 // src/services/authService.js
 import * as SecureStore from "expo-secure-store";
 import { API_URL } from "../config/api";
@@ -748,6 +753,7 @@ export async function getSavedPaths() {
     return { ok: false, error: error.message };
   }
 }
+
 
 // ✅ NOUVEAU — Récupère le profil public d'un user par son ID
 // Utilisé par PathContext pour résoudre le vrai nom du créateur
