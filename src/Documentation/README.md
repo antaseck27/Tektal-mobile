@@ -599,7 +599,7 @@ __tests__/
  
 ---
  
-## 🚢 Déploiement en production
+##  Déploiement en production
  
 ### Checklist avant release
  
@@ -630,7 +630,7 @@ __tests__/
  
 ---
  
-## 🤝 Contribution
+##  Contribution
  
 Les contributions sont les bienvenues ! Voici comment contribuer :
  
@@ -650,7 +650,7 @@ Les contributions sont les bienvenues ! Voici comment contribuer :
  
 ---
  
-## 📝 Roadmap
+## Roadmap
  
 ### Version 1.1 (Q2 2025)
  
@@ -674,24 +674,19 @@ Les contributions sont les bienvenues ! Voici comment contribuer :
  
 ---
  
-## 📄 License
+
  
-Ce projet est sous licence **MIT**. Voir le fichier [LICENSE](LICENSE) pour plus de détails.
- 
----
- 
-## 📧 Contact
+##  Contact
  
 **Équipe TEKTAL**
  
-- **Email** : contact@tektal.app
+- **Email** : antalissa10@gmail.com
 - **Site web** : https://tektal-web-appli.vercel.app
-- **Twitter** : [@TektalApp](https://twitter.com/TektalApp)
-- **GitHub** : [github.com/tektal](https://github.com/tektal)
+- **GitHub** : [github.com/tektal](collefall118@gmail.com)
  
 ---
  
-##  Remerciements
+## deploiement
  
 - **Expo** pour le framework mobile
 - **Cloudinary** pour le stockage vidéo
@@ -701,5 +696,5 @@ Ce projet est sous licence **MIT**. Voir le fichier [LICENSE](LICENSE) pour plus
  
 ---
  
-**Fait  par l'équipe TEKTAL/Bakeli/janvier 2026**
+**Fait par l'équipe TEKTAL/Bakeli/janvier 2026**
  
